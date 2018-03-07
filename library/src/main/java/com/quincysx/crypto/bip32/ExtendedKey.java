@@ -192,7 +192,7 @@ public class ExtendedKey {
     }
 
     public ExtendedKey getReadOnly() {
-        return new ExtendedKey(new ECPublicKey(master.getPublic(), true), chainCode, depth, parent, sequence);
+        return new ExtendedKey(new ECPublicKey(master.getCompPublic(), true), chainCode, depth, parent, sequence);
     }
 
     public boolean isReadOnly() {
@@ -209,7 +209,7 @@ public class ExtendedKey {
             mac.init(key);
 
             byte[] extended;
-            byte[] pub = master.getPublic();
+            byte[] pub = master.getCompPublic();
             if ((sequence & 0x80000000) == 0) {
                 extended = new byte[pub.length + 4];
                 System.arraycopy(pub, 0, extended, 0, pub.length);
@@ -292,7 +292,7 @@ public class ExtendedKey {
                 out.write(0x00);
                 out.write(master.getPrivate());
             } else {
-                out.write(master.getPublic());
+                out.write(master.getCompPublic());
             }
         } catch (IOException e) {
         }

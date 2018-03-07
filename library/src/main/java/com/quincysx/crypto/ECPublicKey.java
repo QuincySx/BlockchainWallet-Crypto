@@ -45,10 +45,20 @@ public class ECPublicKey implements Key {
     }
 
     @Override
+    public byte[] getCompPublic() {
+        return Arrays.clone(pub);
+    }
+
+    @Override
     public ECPublicKey clone() throws CloneNotSupportedException {
         ECPublicKey c = (ECPublicKey) super.clone();
         c.pub = Arrays.clone(pub);
         return c;
+    }
+
+    @Override
+    public <T> T sign(byte[] messageHash) {
+        throw new RuntimeException("Please use private key to sign signature");
     }
 
     @Override

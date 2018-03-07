@@ -12,6 +12,7 @@ import com.quincysx.crypto.bip44.AddressIndex;
 import com.quincysx.crypto.bip44.BIP44;
 import com.quincysx.crypto.bip44.CoinPairDerive;
 import com.quincysx.crypto.ethereum.CallTransaction;
+import com.quincysx.crypto.ethereum.EthECKeyPair;
 import com.quincysx.crypto.ethereum.EthTransaction;
 import com.quincysx.crypto.utils.HexUtils;
 
@@ -152,13 +153,12 @@ public class MainActivity extends AppCompatActivity {
             //转 Token
             EthTransaction txConst = CallTransaction.createCallTransaction(nonce.longValue(), gasPrice.longValue(), gasLimit.longValue(),
                     "6b3b3386f46d2872a4bbfda001cebc7dec844593", 0, CallTransaction.Function.fromSignature("transfer", "address", "uint256"), "4de1f8192dc059cc15f7ba2a045082263cfd1644", 100000000000000000L);
-            txConst.sign((ECKeyPair) master.getMaster());
+            txConst.sign(EthECKeyPair.parse(master.getMaster()));
             byte[] data = txConst.getData();
             byte[] rawHash = txConst.getEncoded();
 
             Log.e("====转Token合约参数===", HexUtils.toHex(data));
             Log.e("====转Token签名===", HexUtils.toHex(rawHash));
-
 
         } catch (ValidationException e) {
             e.printStackTrace();

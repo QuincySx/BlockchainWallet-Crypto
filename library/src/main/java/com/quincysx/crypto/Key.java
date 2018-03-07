@@ -16,6 +16,8 @@
 package com.quincysx.crypto;
 
 
+import android.view.View;
+
 import com.quincysx.crypto.bip32.ValidationException;
 
 public interface Key extends Cloneable {
@@ -25,8 +27,12 @@ public interface Key extends Cloneable {
 
     public byte[] getAddress();
 
+    public byte[] getCompPublic();
+
     public boolean isCompressed();
 
     public Key clone() throws CloneNotSupportedException;
+
+    public <T extends Object> T sign(byte[] messageHash);
 
 }
