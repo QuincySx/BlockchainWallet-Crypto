@@ -30,8 +30,6 @@ import com.quincysx.crypto.utils.KECCAK256;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-import org.spongycastle.crypto.digests.SHA3Digest;
-import org.spongycastle.jcajce.provider.digest.SHA3;
 import org.spongycastle.util.BigIntegers;
 import org.spongycastle.util.encoders.Hex;
 
