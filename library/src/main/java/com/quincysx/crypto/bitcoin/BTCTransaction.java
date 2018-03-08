@@ -23,6 +23,9 @@
 
 package com.quincysx.crypto.bitcoin;
 
+import com.quincysx.crypto.ECKeyPair;
+import com.quincysx.crypto.Transaction;
+import com.quincysx.crypto.bip32.ValidationException;
 import com.quincysx.crypto.utils.BTCUtils;
 import com.quincysx.crypto.utils.Base58;
 import com.quincysx.crypto.utils.HexUtils;
@@ -38,7 +41,7 @@ import java.util.Arrays;
 import java.util.Stack;
 
 @SuppressWarnings("WeakerAccess")
-public final class BTCTransaction {
+public final class BTCTransaction implements Transaction {
     public final int version;
     public final Input[] inputs;
     public final Output[] outputs;
@@ -100,7 +103,8 @@ public final class BTCTransaction {
         this.lockTime = lockTime;
     }
 
-    public byte[] getBytes() {
+    @Override
+    public byte[] getSignBytes() {
         BitcoinOutputStream baos = new BitcoinOutputStream();
         try {
             baos.writeInt32(version);
@@ -136,6 +140,11 @@ public final class BTCTransaction {
         }
         return baos.toByteArray();
 
+    }
+
+    @Override
+    public byte[] getData() {
+        return new byte[0];
     }
 
     @Override
@@ -391,7 +400,7 @@ public final class BTCTransaction {
         }
 
         public static byte[] hashTransactionForSigning(BTCTransaction unsignedTransaction) {
-            byte[] txUnsignedBytes = unsignedTransaction.getBytes();
+            byte[] txUnsignedBytes = unsignedTransaction.getSignBytes();
             BitcoinOutputStream baos = new BitcoinOutputStream();
             try {
                 baos.write(txUnsignedBytes);
@@ -606,4 +615,14 @@ public final class BTCTransaction {
             }
         }
     }
+
+    @Override
+    public void sign(ECKeyPair key) throws ValidationException {
+        BTCTransaction sign = key.sign(this.getSignBytes());
+        int length = sign.inputs.length;
+        for (int i = 0; i < length; i++) {
+            this.inputs[i] = sign.inputs[i];
+        }
+    }
+
 }

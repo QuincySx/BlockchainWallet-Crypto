@@ -3,7 +3,6 @@ package com.quincysx.crypto.ethereum;
 import com.quincysx.crypto.ECKeyPair;
 import com.quincysx.crypto.Key;
 import com.quincysx.crypto.bip32.ValidationException;
-import com.quincysx.crypto.utils.HexUtils;
 import com.quincysx.crypto.utils.KECCAK256;
 
 import org.spongycastle.asn1.x9.X9IntegerConverter;
@@ -41,12 +40,14 @@ public class EthECKeyPair extends ECKeyPair {
 
     @Override
     public byte[] getPublic() {
-        return Arrays.clone(pub);
+        byte[] publicKey = new byte[pub.length - 1];
+        System.arraycopy(pub, 1, publicKey, 0, publicKey.length);
+        return publicKey;
     }
 
     @Override
     public byte[] getAddress() {
-        byte[] byteAddress = KECCAK256.keccak256(pub);
+        byte[] byteAddress = KECCAK256.keccak256(getPublic());
         byte[] address = new byte[20];
         System.arraycopy(byteAddress, 12, address, 0, address.length);
         return address;

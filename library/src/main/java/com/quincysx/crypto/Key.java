@@ -33,6 +33,6 @@ public interface Key extends Cloneable {
 
     public Key clone() throws CloneNotSupportedException;
 
-    public <T extends Object> T sign(byte[] messageHash);
+    public <T extends Object> T sign(byte[] messageHash) throws ValidationException;
 
 }

@@ -11,9 +11,9 @@ import com.quincysx.crypto.bip39.wordlists.English;
 import com.quincysx.crypto.bip44.AddressIndex;
 import com.quincysx.crypto.bip44.BIP44;
 import com.quincysx.crypto.bip44.CoinPairDerive;
+import com.quincysx.crypto.bitcoin.BitCoinECKeyPair;
 import com.quincysx.crypto.ethereum.CallTransaction;
 import com.quincysx.crypto.ethereum.EthECKeyPair;
-import com.quincysx.crypto.ethereum.EthTransaction;
 import com.quincysx.crypto.utils.HexUtils;
 
 import java.math.BigInteger;
@@ -104,21 +104,33 @@ public class MainActivity extends AppCompatActivity {
 //            ExtendedKey master = coinKeyPair.deriveByExtendedKey(address);
 //            CoinKeyPair bitcoinKeyPair = coinKeyPair.convertEthKeyPair(new BigInteger(1, master.getMaster().getPrivate()));
 
+            Log.e("=12221=", "==========开始============");
+
             ExtendedKey extendedKey = ExtendedKey.create(seed);
             AddressIndex address = BIP44.m().purpose44()
-                    .coinType(60)
+                    .coinType(1)
                     .account(0)
                     .external()
                     .address(0);
             CoinPairDerive coinKeyPair = new CoinPairDerive(extendedKey);
-            ExtendedKey master = coinKeyPair.deriveByExtendedKey(address);
-            CoinKeyPair bitcoinKeyPair = coinKeyPair.convertEthKeyPair(new BigInteger(1, master.getMaster().getPrivate()));
+            ECKeyPair master = coinKeyPair.derive(address);
 
-            Log.e("=1231=", "======================");
-            Log.e("=1231=", bitcoinKeyPair.getPrivateKey());
-            Log.e("=1231=", bitcoinKeyPair.getPublicKey());
-            Log.e("=1231=", bitcoinKeyPair.getAddress());
-            Log.e("=1231=", "======================");
+            if (master instanceof BitCoinECKeyPair) {
+                BitCoinECKeyPair bitCoinECKeyPair = (BitCoinECKeyPair) master;
+                Log.e("=12221=", "======================");
+                Log.e("=12221private", bitCoinECKeyPair.getWIFPrivateKey());
+                Log.e("=12221public=", HexUtils.toHex(bitCoinECKeyPair.getPublic()));
+                Log.e("=12221address=", bitCoinECKeyPair.getStrAddress());
+                Log.e("=12221=", "======================");
+            } else if (master instanceof EthECKeyPair) {
+                EthECKeyPair ethECKeyPair = (EthECKeyPair) master;
+                Log.e("=12221=", "======================");
+                Log.e("=12221private", HexUtils.toHex(ethECKeyPair.getPrivate()));
+                Log.e("=12221public=", HexUtils.toHex(ethECKeyPair.getPublic()));
+                Log.e("=12221address=", HexUtils.toHex(ethECKeyPair.getAddress()));
+                Log.e("=12221=", "======================");
+            }
+
 
             //普通上链签名=========
             BigInteger nonce = new BigInteger("12");
@@ -151,14 +163,15 @@ public class MainActivity extends AppCompatActivity {
 //            Log.e("====签名===", HexUtils.toHex(rawHash));
 
             //转 Token
-            EthTransaction txConst = CallTransaction.createCallTransaction(nonce.longValue(), gasPrice.longValue(), gasLimit.longValue(),
-                    "6b3b3386f46d2872a4bbfda001cebc7dec844593", 0, CallTransaction.Function.fromSignature("transfer", "address", "uint256"), "4de1f8192dc059cc15f7ba2a045082263cfd1644", 100000000000000000L);
-            txConst.sign(EthECKeyPair.parse(master.getMaster()));
-            byte[] data = txConst.getData();
-            byte[] rawHash = txConst.getEncoded();
-
-            Log.e("====转Token合约参数===", HexUtils.toHex(data));
-            Log.e("====转Token签名===", HexUtils.toHex(rawHash));
+//            Transaction txConst = CallTransaction.createCallTransaction(nonce.longValue(), gasPrice.longValue(), gasLimit.longValue(),
+//                    "6b3b3386f46d2872a4bbfda001cebc7dec844593", 0, CallTransaction.Function.fromSignature("transfer", "address", "uint256"), "4de1f8192dc059cc15f7ba2a045082263cfd1644", 100000000000000000L);
+//
+//            txConst.sign(master);
+//            byte[] data = txConst.getData();
+//            byte[] rawHash = txConst.getSignBytes();
+//
+//            Log.e("====转Token合约参数===", HexUtils.toHex(data));
+//            Log.e("====转Token签名===", HexUtils.toHex(rawHash));
 
         } catch (ValidationException e) {
             e.printStackTrace();

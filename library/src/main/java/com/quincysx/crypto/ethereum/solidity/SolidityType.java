@@ -292,7 +292,7 @@ public abstract class SolidityType {
         public byte[] encode(Object value) {
             if (!(value instanceof String))
                 throw new RuntimeException("String value expected for type 'string'");
-//            return super.encode(((String) value).getBytes(StandardCharsets.UTF_8));
+//            return super.encode(((String) value).getSignBytes(StandardCharsets.UTF_8));
             try {
                 return super.encode(((String) value).getBytes("UTF-8"));
             } catch (UnsupportedEncodingException e) {

@@ -16,18 +16,14 @@
 package com.quincysx.crypto;
 
 import com.quincysx.crypto.bip32.ValidationException;
-import com.quincysx.crypto.utils.Base58;
 import com.quincysx.crypto.utils.RIPEMD160;
-import com.quincysx.crypto.utils.SHA256;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
 import org.spongycastle.asn1.ASN1InputStream;
 import org.spongycastle.asn1.DERInteger;
-import org.spongycastle.asn1.DERSequenceGenerator;
 import org.spongycastle.asn1.DLSequence;
 import org.spongycastle.asn1.sec.SECNamedCurves;
 import org.spongycastle.asn1.x9.X9ECParameters;
@@ -46,6 +42,7 @@ public class ECKeyPair implements Key {
     protected static final SecureRandom secureRandom = new SecureRandom();
     protected static final X9ECParameters CURVE = SECNamedCurves.getByName("secp256k1");
     protected static final ECDomainParameters domain = new ECDomainParameters(CURVE.getCurve(), CURVE.getG(), CURVE.getN(), CURVE.getH());
+    protected static final BigInteger LARGEST_PRIVATE_KEY = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
 
     protected BigInteger priv;
     protected byte[] pub;
@@ -140,32 +137,9 @@ public class ECKeyPair implements Key {
         return RIPEMD160.hash160(pubComp);
     }
 
-    public byte[] signBTC(byte[] hash) throws ValidationException {
-        if (priv == null) {
-            throw new ValidationException("Need private key to sign");
-        }
-        ECDSASigner signer = new ECDSASigner();
-        signer.init(true, new ECPrivateKeyParameters(priv, domain));
-        BigInteger[] signature = signer.generateSignature(hash);
-        ByteArrayOutputStream s = new ByteArrayOutputStream();
-        try {
-            DERSequenceGenerator seq = new DERSequenceGenerator(s);
-            seq.addObject(new DERInteger(signature[0]));
-            seq.addObject(new DERInteger(signature[1]));
-            seq.close();
-            return s.toByteArray();
-        } catch (IOException e) {
-        }
-        return null;
-    }
-
-    public boolean verifyBTC(byte[] hash, byte[] signature) {
-        return verify(hash, signature, pubComp);
-    }
-
     @Override
-    public <T> T sign(byte[] messageHash) {
-        throw new RuntimeException("Please convert to ECKeyPair subclass signature");
+    public <T> T sign(byte[] messageHash) throws ValidationException {
+        throw new ValidationException("Please convert to ECKeyPair subclass signature");
     }
 
     public static boolean verify(byte[] hash, byte[] signature, byte[] pub) {
@@ -185,67 +159,6 @@ public class ECKeyPair implements Key {
             try {
                 asn1.close();
             } catch (IOException e) {
-            }
-        }
-    }
-
-    public static String serializeWIF(Key key) {
-        return Base58.encode(bytesWIF(key));
-    }
-
-    private static byte[] bytesWIF(Key key) {
-        byte[] k = key.getPrivate();
-        if (key.isCompressed()) {
-            byte[] encoded = new byte[k.length + 6];
-            byte[] ek = new byte[k.length + 2];
-            ek[0] = (byte) 0x80;
-            System.arraycopy(k, 0, ek, 1, k.length);
-            ek[k.length + 1] = 0x01;
-            byte[] hash = SHA256.doubleSha256(ek);
-            System.arraycopy(ek, 0, encoded, 0, ek.length);
-            System.arraycopy(hash, 0, encoded, ek.length, 4);
-            return encoded;
-        } else {
-            byte[] encoded = new byte[k.length + 5];
-            byte[] ek = new byte[k.length + 1];
-            ek[0] = (byte) 0x80;
-            System.arraycopy(k, 0, ek, 1, k.length);
-            byte[] hash = SHA256.doubleSha256(ek);
-            System.arraycopy(ek, 0, encoded, 0, ek.length);
-            System.arraycopy(hash, 0, encoded, ek.length, 4);
-            return encoded;
-        }
-    }
-
-    public static ECKeyPair parseWIF(String serialized) throws ValidationException {
-        byte[] store = Base58.decode(serialized);
-        return parseBytesWIF(store);
-    }
-
-    public static ECKeyPair parseBytesWIF(byte[] store) throws ValidationException {
-        if (store.length == 37) {
-            checkChecksum(store);
-            byte[] key = new byte[store.length - 5];
-            System.arraycopy(store, 1, key, 0, store.length - 5);
-            return new ECKeyPair(key, false);
-        } else if (store.length == 38) {
-            checkChecksum(store);
-            byte[] key = new byte[store.length - 6];
-            System.arraycopy(store, 1, key, 0, store.length - 6);
-            return new ECKeyPair(key, true);
-        }
-        throw new ValidationException("Invalid key length");
-    }
-
-    private static void checkChecksum(byte[] store) throws ValidationException {
-        byte[] checksum = new byte[4];
-        System.arraycopy(store, store.length - 4, checksum, 0, 4);
-        byte[] ekey = new byte[store.length - 4];
-        System.arraycopy(store, 0, ekey, 0, store.length - 4);
-        byte[] hash = SHA256.doubleSha256(ekey);
-        for (int i = 0; i < 4; ++i) {
-            if (hash[i] != checksum[i]) {
-                throw new ValidationException("checksum mismatch");
             }
         }
     }

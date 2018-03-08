@@ -199,7 +199,7 @@ public class CallTransaction {
 
         public byte[] encodeSignatureLong() {
             String signature = formatSignature();
-//            byte[] sha3Fingerprint = sha3(signature.getBytes());
+//            byte[] sha3Fingerprint = sha3(signature.getSignBytes());
             byte[] sha3Fingerprint = KECCAK256.keccak256(signature.getBytes());
             return sha3Fingerprint;
         }

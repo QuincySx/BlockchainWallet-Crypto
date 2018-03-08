@@ -20,6 +20,8 @@ package com.quincysx.crypto.ethereum;
 import android.util.Log;
 
 import com.quincysx.crypto.ECKeyPair;
+import com.quincysx.crypto.Transaction;
+import com.quincysx.crypto.bip32.ValidationException;
 import com.quincysx.crypto.ethereum.rlp.RLP;
 import com.quincysx.crypto.ethereum.rlp.RLPElement;
 import com.quincysx.crypto.ethereum.rlp.RLPItem;
@@ -45,7 +47,7 @@ import static com.quincysx.crypto.ethereum.utils.ByteUtil.ZERO_BYTE_ARRAY;
  * There are two types of transactions: those which result in message calls
  * and those which result in the creation of new contracts.
  */
-public class EthTransaction {
+public class EthTransaction implements Transaction {
 
     //    private static final Logger logger = LoggerFactory.getLogger(EthTransaction.class);
     private static final BigInteger DEFAULT_GAS_PRICE = new BigInteger("10000000000000");
@@ -411,9 +413,15 @@ public class EthTransaction {
 //        sign(ECKeyPair.fromPrivate(privKeyBytes));
 //    }
 
-    public void sign(ECKeyPair key) {
+    @Override
+    public void sign(ECKeyPair key) throws ValidationException {
         this.signature = key.sign(this.getRawHash());
         this.rlpEncoded = null;
+    }
+
+    @Override
+    public byte[] getSignBytes() {
+        return getEncoded();
     }
 
     @Override
