@@ -6,17 +6,22 @@ import android.util.Log;
 
 import com.quincysx.crypto.bip32.ExtendedKey;
 import com.quincysx.crypto.bip32.ValidationException;
+import com.quincysx.crypto.bip38.BIP38PrivateKey;
+import com.quincysx.crypto.bip38.Bip38;
 import com.quincysx.crypto.bip39.SeedCalculator;
 import com.quincysx.crypto.bip39.wordlists.English;
 import com.quincysx.crypto.bip44.AddressIndex;
 import com.quincysx.crypto.bip44.BIP44;
 import com.quincysx.crypto.bip44.CoinPairDerive;
 import com.quincysx.crypto.bitcoin.BitCoinECKeyPair;
+import com.quincysx.crypto.bitcoin.BitcoinException;
 import com.quincysx.crypto.ethereum.CallTransaction;
 import com.quincysx.crypto.ethereum.EthECKeyPair;
 import com.quincysx.crypto.utils.HexUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -104,11 +109,11 @@ public class MainActivity extends AppCompatActivity {
 //            ExtendedKey master = coinKeyPair.deriveByExtendedKey(address);
 //            CoinKeyPair bitcoinKeyPair = coinKeyPair.convertEthKeyPair(new BigInteger(1, master.getMaster().getPrivate()));
 
-            Log.e("=12221=", "==========开始============");
+            Log.e("=1221=", "==========开始============");
 
             ExtendedKey extendedKey = ExtendedKey.create(seed);
             AddressIndex address = BIP44.m().purpose44()
-                    .coinType(1)
+                    .coinType(0)
                     .account(0)
                     .external()
                     .address(0);
@@ -117,11 +122,27 @@ public class MainActivity extends AppCompatActivity {
 
             if (master instanceof BitCoinECKeyPair) {
                 BitCoinECKeyPair bitCoinECKeyPair = (BitCoinECKeyPair) master;
-                Log.e("=12221=", "======================");
-                Log.e("=12221private", bitCoinECKeyPair.getWIFPrivateKey());
-                Log.e("=12221public=", HexUtils.toHex(bitCoinECKeyPair.getPublic()));
-                Log.e("=12221address=", bitCoinECKeyPair.getStrAddress());
-                Log.e("=12221=", "======================");
+                Log.e("=1221=", "======================");
+                Log.e("=1221private", bitCoinECKeyPair.getWIFPrivateKey());
+                Log.e("=1221public=", HexUtils.toHex(bitCoinECKeyPair.getPublic()));
+                Log.e("=1221address=", bitCoinECKeyPair.getStrAddress());
+                Log.e("=1221=", "======================");
+
+                try {
+                    String s = Bip38.encryptNoEcMultiply("123456", bitCoinECKeyPair.getWIFPrivateKey());
+
+                    Log.e("=====", s);
+
+//                    String s1 = Bip38.decrypt(s, "123456");
+//
+//                    Log.e("=====", s1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+//                    String s2 = Bip38.bip38DecryptConfirmation(s, "123456");
+//                    Log.e("===s===", s2);
+
             } else if (master instanceof EthECKeyPair) {
                 EthECKeyPair ethECKeyPair = (EthECKeyPair) master;
                 Log.e("=12221=", "======================");
@@ -164,7 +185,9 @@ public class MainActivity extends AppCompatActivity {
 
             //转 Token
 //            Transaction txConst = CallTransaction.createCallTransaction(nonce.longValue(), gasPrice.longValue(), gasLimit.longValue(),
-//                    "6b3b3386f46d2872a4bbfda001cebc7dec844593", 0, CallTransaction.Function.fromSignature("transfer", "address", "uint256"), "4de1f8192dc059cc15f7ba2a045082263cfd1644", 100000000000000000L);
+//                    "6b3b3386f46d2872a4bbfda001cebc7dec844593", 0,
+//                    CallTransaction.Function.fromSignature("transfer",
+//                            "address", "uint256"), "4de1f8192dc059cc15f7ba2a045082263cfd1644", 100000000000000000L);
 //
 //            txConst.sign(master);
 //            byte[] data = txConst.getData();
@@ -172,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
 //
 //            Log.e("====转Token合约参数===", HexUtils.toHex(data));
 //            Log.e("====转Token签名===", HexUtils.toHex(rawHash));
+
 
         } catch (ValidationException e) {
             e.printStackTrace();

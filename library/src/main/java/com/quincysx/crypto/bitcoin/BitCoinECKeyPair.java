@@ -1,7 +1,5 @@
 package com.quincysx.crypto.bitcoin;
 
-import android.util.Log;
-
 import com.quincysx.crypto.ECKeyPair;
 import com.quincysx.crypto.Key;
 import com.quincysx.crypto.bip32.ValidationException;
@@ -33,8 +31,8 @@ public class BitCoinECKeyPair extends ECKeyPair {
     private static final int TEST_NET_ADDRESS_SUFFIX = 0x6f;
     private static final int MAIN_NET_ADDRESS_SUFFIX = 0x00;
 
-    private static final int MAIN_NET_PRIVATE_KEY_PREFIX = 0x80;
-    private static final int TEST_NET_PRIVATE_KEY_PREFIX = 0xef;
+    public static final int MAIN_NET_PRIVATE_KEY_PREFIX = 0x80;
+    public static final int TEST_NET_PRIVATE_KEY_PREFIX = 0xef;
     private static final int MAIN_NET_PRIVATE_KEY_SUFFIX = 0x01;
 
     private static final int RAW_PRIVATE_KEY_COMPRESSED_LENGTH = 38;
@@ -59,6 +57,11 @@ public class BitCoinECKeyPair extends ECKeyPair {
     public BitCoinECKeyPair(Key keyPair, boolean testNet) {
         super(keyPair);
         this.testNet = testNet;
+    }
+
+    protected BitCoinECKeyPair(BigInteger priv, boolean compressed) throws ValidationException {
+        super(priv, compressed);
+        this.testNet = false;
     }
 
     public boolean isTestNet() {
