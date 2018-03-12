@@ -1,7 +1,5 @@
 package com.quincysx.crypto.bip44;
 
-import android.support.annotation.IntDef;
-
 /**
  * @author QuincySx
  * @date 2018/3/5 下午3:36
