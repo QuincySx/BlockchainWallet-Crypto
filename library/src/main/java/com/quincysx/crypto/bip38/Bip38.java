@@ -1,7 +1,6 @@
 package com.quincysx.crypto.bip38;
 
 
-import com.quincysx.crypto.SecureCharSequence;
 import com.quincysx.crypto.bip32.ValidationException;
 import com.quincysx.crypto.bitcoin.BitCoinECKeyPair;
 import com.quincysx.crypto.utils.Base58;
@@ -11,34 +10,31 @@ import com.quincysx.crypto.utils.SHA256;
 import org.spongycastle.asn1.sec.SECNamedCurves;
 import org.spongycastle.asn1.x9.X9ECParameters;
 import org.spongycastle.crypto.generators.SCrypt;
-import org.spongycastle.crypto.params.ECDomainParameters;
-import org.spongycastle.jce.interfaces.ECKey;
-import org.spongycastle.util.Arrays;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
-import java.security.GeneralSecurityException;
-import java.security.SecureRandom;
+import java.util.Arrays;
 
 /**
  * @author QuincySx
  * @date 2018/3/8 下午2:41
  */
 public class Bip38 {
-    protected static final SecureRandom SECURE_RANDOM = new SecureRandom();
-    protected static final X9ECParameters CURVE = SECNamedCurves.getByName("secp256k1");
-    protected static final ECDomainParameters EC_PARAMS = new ECDomainParameters(CURVE.getCurve(), CURVE.getG(), CURVE.getN(), CURVE.getH());
+    //官方推荐参数 性能差的手机耗时特别长
+    private static final int SCRYPT_N = 16384;
+    private static final int SCRYPT_R = 8;
+    private static final int SCRYPT_P = 8;
 
-    public static final String BIP38_CHARACTER_ENCODING = "UTF-8";
-    public static final int SCRYPT_N = 16384;
-    public static final int SCRYPT_LOG2_N = 14;
-    public static final int SCRYPT_R = 8;
-    public static final int SCRYPT_P = 8;
-    public static final int SCRYPT_LENGTH = 64;
+    //性能差的手机也秒出，安全性差
+//    private static final int SCRYPT_N = 1024;
+//    private static final int SCRYPT_R = 1;
+//    private static final int SCRYPT_P = 1;
 
-    public static final BigInteger n = new BigInteger(1, HexUtils.fromHex("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"));
+    private static final int SCRYPT_LENGTH = 64;
+
+    private static final BigInteger n = new BigInteger(1, HexUtils.fromHex("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"));
 
     /**
      * Encrypt a SIPA formatted private key with a passphrase using BIP38.
@@ -50,9 +46,11 @@ public class Bip38 {
      */
     public static String encryptNoEcMultiply(CharSequence passphrase, String base58EncodedPrivateKey) throws ValidationException, InterruptedException {
         byte[] tmp = Base58.decode(base58EncodedPrivateKey);
+
         int version = tmp[0] & 0xFF;
-        byte[] bytes = new byte[tmp.length - 1];
-        System.arraycopy(tmp, 1, bytes, 0, tmp.length - 1);
+
+        byte[] bytes = new byte[tmp.length - 4 - 1];
+        System.arraycopy(tmp, 1, bytes, 0, bytes.length);
         boolean compressed = true;
         if (bytes.length == 33 && bytes[32] == 1) {
             compressed = true;
@@ -68,10 +66,13 @@ public class Bip38 {
             testNet = false;
         }
 
+        Arrays.fill(tmp, (byte) 0);
+
         BitCoinECKeyPair bitCoinECKeyPair = new BitCoinECKeyPair(bytes, testNet, compressed);
 
         byte[] salt = Bip38.calculateScryptSalt(bitCoinECKeyPair.getStrAddress());
         byte[] stretchedKeyMaterial = bip38Stretch1(passphrase, salt, SCRYPT_LENGTH);
+
         return encryptNoEcMultiply(stretchedKeyMaterial, bitCoinECKeyPair, salt);
     }
 
@@ -87,7 +88,7 @@ public class Bip38 {
         byte[] derived;
         try {
             passwordBytes = convertToByteArray(passphrase);
-            derived = SCrypt.generate(convertToByteArray(passphrase), salt, SCRYPT_N, SCRYPT_R, SCRYPT_P, outputSize
+            derived = SCrypt.generate(passwordBytes, salt, SCRYPT_N, SCRYPT_R, SCRYPT_P, outputSize
             );
             return derived;
         } finally {
@@ -99,7 +100,9 @@ public class Bip38 {
     }
 
     private static byte[] convertToByteArray(CharSequence charSequence) {
-//        checkNotNull(charSequence);
+        if (charSequence == null) {
+            throw new RuntimeException("charSequence not NULL");
+        }
         ByteBuffer bb = Charset.forName("UTF-8").encode(CharBuffer.wrap(charSequence));
         byte[] result = new byte[bb.remaining()];
         bb.get(result);
@@ -108,20 +111,15 @@ public class Bip38 {
         java.util.Arrays.fill(clearTest, (byte) 0);
         bb.put(clearTest);
         return result;
-
-
     }
 
     public static String encryptNoEcMultiply(byte[] stretcedKeyMaterial, BitCoinECKeyPair key, byte[] salt) {
-
-        // Encoded result
         int checksumLength = 4;
         byte[] encoded = new byte[39 + checksumLength];
         int index = 0;
         encoded[index++] = (byte) 0x01;
         encoded[index++] = (byte) 0x42;
 
-        // Flags byte
         byte non_EC_multiplied = (byte) 0xC0;
         byte compressedPublicKey = key.isCompressed() ? (byte) 0x20 : (byte) 0;
         encoded[index++] = (byte) (non_EC_multiplied | compressedPublicKey);
@@ -141,7 +139,6 @@ public class Bip38 {
         aes.makeKey(derivedHalf2, 256);
 
         // Get private key bytes
-//        byte[] complete = key.getPrivKeyBytes();
         byte[] complete = key.getPrivate();
 
         // Insert first encrypted key part
@@ -173,9 +170,7 @@ public class Bip38 {
         System.arraycopy(start, 0, encoded, 39, checksumLength);
 
         // Base58 encode
-//        String result = Bip38Util.encode(encoded);
-        String result = Base58.encode(encoded);
-        return result;
+        return Base58.encode(encoded);
     }
 
     public static boolean isBip38PrivateKey(String bip38PrivateKey) {
@@ -205,8 +200,8 @@ public class Bip38 {
             return null;
         }
 
-        // Validate length
-        if (decoded.length != 39) {
+        //Validate length
+        if (!(decoded.length == 39 || decoded.length == 43)) {
             return null;
         }
 
@@ -267,14 +262,9 @@ public class Bip38 {
     }
 
     /**
-     * Decrypt a BIP38 formatted private key with a passphrase.
-     * <p/>
-     * This is a helper function that does everything in one go. You can call the
-     * individual functions if you wish to separate it into more phases.
-     *
-     * @throws InterruptedException
+     * 可能为 Null ，Null 代表密码不正确
      */
-    public static String decrypt(String bip38PrivateKeyString, CharSequence passphrase) throws InterruptedException, ValidationException {
+    public static BitCoinECKeyPair decrypt(String bip38PrivateKeyString, CharSequence passphrase) throws InterruptedException, ValidationException {
         Bip38PrivateKey bip38Key = parseBip38PrivateKey(bip38PrivateKeyString);
         if (bip38Key == null) {
             return null;
@@ -287,7 +277,7 @@ public class Bip38 {
         }
     }
 
-    public static String decryptEcMultiply(Bip38PrivateKey bip38Key, CharSequence passphrase
+    public static BitCoinECKeyPair decryptEcMultiply(Bip38PrivateKey bip38Key, CharSequence passphrase
     ) throws InterruptedException, ValidationException {
         // Get 8 byte Owner Salt
         byte[] ownerEntropy = new byte[8];
@@ -308,13 +298,11 @@ public class Bip38 {
             System.arraycopy(ownerEntropy, 0, tmp, 32, 8);
             //we convert to byte[] here since this can be a sha256 or Scrypt result.
             // might make sense to introduce a 32 byte scrypt type
-//            passFactor = Bip38Util.doubleSha256(tmp).getBytes();
             passFactor = SHA256.doubleSha256(tmp);
         }
-//        ECKey key = new ECKey(new BigInteger(1, passFactor), null, true);
         // Determine Pass Point
 
-        BitCoinECKeyPair bitCoinECKeyPair = new BitCoinECKeyPair(passFactor, false, true);
+        BitCoinECKeyPair bitCoinECKeyPair = new BitCoinECKeyPair(passFactor, false, bip38Key.compressed);
         byte[] passPoint = bitCoinECKeyPair.getPublic();
 
         // Get 8 byte encrypted part 1, only first half of encrypted part 1
@@ -366,40 +354,18 @@ public class Bip38 {
         if (bytes.length <= keyBytes.length) {
             System.arraycopy(bytes, 0, keyBytes, keyBytes.length - bytes.length, bytes.length);
         } else {
-            // This happens if the most significant bit is set and we have an
-            // extra leading zero to avoid a negative BigInteger
             assert bytes.length == 33 && bytes[0] == 0;
             System.arraycopy(bytes, 1, keyBytes, 0, bytes.length - 1);
         }
-//        ECKey ecKey = new ECKey(new BigInteger(1, keyBytes), null, bip38Key.compressed);
 
-        BitCoinECKeyPair ecKeyPair = new BitCoinECKeyPair(new BigInteger(1, keyBytes), false, bip38Key.compressed);
-        // Validate result
-
-        byte[] newSalt = calculateScryptSalt(ecKeyPair.getStrAddress());
-        if (!java.util.Arrays.equals(bip38Key.salt, newSalt)) {
-            // The passphrase is either invalid or we are on the wrong network
-            return null;
+        BitCoinECKeyPair ecKeyPair = verify(keyBytes, bip38Key.salt, false, bip38Key.compressed);
+        if (ecKeyPair == null) {
+            return verify(keyBytes, bip38Key.salt, true, bip38Key.compressed);
         }
-//        DumpedPrivateKey dumpedPrivateKey = new DumpedPrivateKey(ecKeyPair.getPrivate(), ecKeyPair.isCompressed());
-//
-//        byte[] aPrivate = ecKeyPair.getPrivate();
-//        // The result is returned in SIPA format
-//        byte[] addressBytes = new byte[1 + aPrivate.length + 4];
-//        addressBytes[0] = (byte) version;
-//        System.arraycopy(aPrivate, 0, addressBytes, 1, aPrivate.length);
-//        byte[] check = SHA256.doubleSha256(addressBytes, 0, aPrivate.length + 1);
-//        System.arraycopy(check, 0, addressBytes, bytes.length + 1, 4);
-//        return Base58.encode(addressBytes);
-//
-//        SecureCharSequence secureCharSequence = dumpedPrivateKey.toSecureCharSequence();
-//        dumpedPrivateKey.clearPrivateKey();
-//        ecKey.clearPrivateKey();
-
-        return ecKeyPair.getWIFPrivateKey();
+        return ecKeyPair;
     }
 
-    public static String decryptNoEcMultiply(Bip38PrivateKey bip38Key, byte[] stretcedKeyMaterial) throws ValidationException {
+    public static BitCoinECKeyPair decryptNoEcMultiply(Bip38PrivateKey bip38Key, byte[] stretcedKeyMaterial) throws ValidationException {
         // Derive Keys
         byte[] derivedHalf1 = new byte[32];
         System.arraycopy(stretcedKeyMaterial, 0, derivedHalf1, 0, 32);
@@ -430,33 +396,25 @@ public class Bip38 {
             complete[i + 16] = (byte) ((((int) decryptedHalf2[i]) & 0xFF) ^ (((int) derivedHalf1[i + 16]) & 0xFF));
         }
 
-        BitCoinECKeyPair bitCoinECKeyPair = new BitCoinECKeyPair(complete, false, bip38Key.compressed);
-        // Create private key
+        BitCoinECKeyPair bitCoinECKeyPair = verify(complete, bip38Key.salt, false, bip38Key.compressed);
+        if (bitCoinECKeyPair == null) {
+            return verify(complete, bip38Key.salt, true, bip38Key.compressed);
+        }
+        return bitCoinECKeyPair;
+    }
 
-        // Validate result
+    private static BitCoinECKeyPair verify(byte[] complete, byte[] salt, boolean testNet, boolean compress) throws ValidationException {
+        BitCoinECKeyPair bitCoinECKeyPair = new BitCoinECKeyPair(complete, testNet, compress);
 
         byte[] newSalt = calculateScryptSalt(bitCoinECKeyPair.getStrAddress());
-        if (!java.util.Arrays.equals(bip38Key.salt, newSalt)) {
+        if (!java.util.Arrays.equals(salt, newSalt)) {
             // The passphrase is either invalid or we are on the wrong network
             return null;
         }
-
-//        // Get SIPA format
-//        DumpedPrivateKey dumpedPrivateKey = new DumpedPrivateKey(key.getPrivKeyBytes(), key.isCompressed());
-//
-//        SecureCharSequence secureCharSequence = dumpedPrivateKey.toSecureCharSequence();
-//        dumpedPrivateKey.clearPrivateKey();
-//        key.clearPrivateKey();
-        return bitCoinECKeyPair.getWIFPrivateKey();
+        return bitCoinECKeyPair;
     }
 
 
-    /**
-     * Calculate scrypt salt from Bitcoin address
-     * <p/>
-     * BIP38 uses a scrypt salt which depends on the Bitcoin address. This method
-     * takes a Bitcoin address and calculates the BIP38 salt.
-     */
     public static byte[] calculateScryptSalt(String address) {
         byte[] hash = SHA256.doubleSha256(address.getBytes());
         byte[] ret = new byte[4];

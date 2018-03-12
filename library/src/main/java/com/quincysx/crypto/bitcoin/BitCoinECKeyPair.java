@@ -149,7 +149,6 @@ public class BitCoinECKeyPair extends ECKeyPair {
 
         byte[] check = SHA256.doubleSha256(rawPrivateKey, 0, rawPrivateKey.length - 4);
         System.arraycopy(check, 0, rawPrivateKey, rawPrivateKey.length - 4, 4);
-
         return Base58.encode(rawPrivateKey);
     }
 

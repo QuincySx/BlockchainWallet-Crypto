@@ -6,7 +6,6 @@ import android.util.Log;
 
 import com.quincysx.crypto.bip32.ExtendedKey;
 import com.quincysx.crypto.bip32.ValidationException;
-import com.quincysx.crypto.bip38.BIP38PrivateKey;
 import com.quincysx.crypto.bip38.Bip38;
 import com.quincysx.crypto.bip39.SeedCalculator;
 import com.quincysx.crypto.bip39.wordlists.English;
@@ -14,14 +13,10 @@ import com.quincysx.crypto.bip44.AddressIndex;
 import com.quincysx.crypto.bip44.BIP44;
 import com.quincysx.crypto.bip44.CoinPairDerive;
 import com.quincysx.crypto.bitcoin.BitCoinECKeyPair;
-import com.quincysx.crypto.bitcoin.BitcoinException;
-import com.quincysx.crypto.ethereum.CallTransaction;
 import com.quincysx.crypto.ethereum.EthECKeyPair;
 import com.quincysx.crypto.utils.HexUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -130,18 +125,13 @@ public class MainActivity extends AppCompatActivity {
 
                 try {
                     String s = Bip38.encryptNoEcMultiply("123456", bitCoinECKeyPair.getWIFPrivateKey());
-
                     Log.e("=====", s);
+                    BitCoinECKeyPair s1 = Bip38.decrypt(s, "123456");
 
-//                    String s1 = Bip38.decrypt(s, "123456");
-//
-//                    Log.e("=====", s1);
+                    Log.e("=====", s1.getWIFPrivateKey());
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
-//                    String s2 = Bip38.bip38DecryptConfirmation(s, "123456");
-//                    Log.e("===s===", s2);
 
             } else if (master instanceof EthECKeyPair) {
                 EthECKeyPair ethECKeyPair = (EthECKeyPair) master;
