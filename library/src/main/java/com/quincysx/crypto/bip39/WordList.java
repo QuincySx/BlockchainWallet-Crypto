@@ -31,6 +31,8 @@ public interface WordList {
      */
     String getWord(final int index);
 
+    int getIndex(final String word);
+
     /**
      * Get the space character for this language.
      *

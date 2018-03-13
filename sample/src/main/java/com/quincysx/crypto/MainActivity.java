@@ -7,8 +7,10 @@ import android.util.Log;
 import com.quincysx.crypto.bip32.ExtendedKey;
 import com.quincysx.crypto.bip32.ValidationException;
 import com.quincysx.crypto.bip38.Bip38;
-import com.quincysx.crypto.bip39.SeedCalculator;
-import com.quincysx.crypto.bip39.wordlists.English;
+import com.quincysx.crypto.bip39.MnemonicCode;
+import com.quincysx.crypto.bip39.MnemonicException;
+import com.quincysx.crypto.bip39.RandomSeed;
+import com.quincysx.crypto.bip39.Words;
 import com.quincysx.crypto.bip44.AddressIndex;
 import com.quincysx.crypto.bip44.BIP44;
 import com.quincysx.crypto.bip44.CoinPairDerive;
@@ -62,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
 //        } catch (NoSuchAlgorithmException e) {
 //            e.printStackTrace();
 //        }
-        List<String> mnemonicWordsInAList = new ArrayList<>();
+        final List<String> mnemonicWordsInAList = new ArrayList<>();
 //        mnemonicWordsInAList.add("flavor");
 //        mnemonicWordsInAList.add("casual");
 //        mnemonicWordsInAList.add("library");
@@ -89,11 +91,15 @@ public class MainActivity extends AppCompatActivity {
         mnemonicWordsInAList.add("athlete");
         mnemonicWordsInAList.add("diet");
 
-        byte[] seed = new SeedCalculator()
-                .withWordsFromWordList(English.INSTANCE)
-                .calculateSeed(mnemonicWordsInAList, "");
 
         try {
+            byte[] random = RandomSeed.random(Words.TWELVE);
+            MnemonicCode mnemonicCode = new MnemonicCode();
+            List<String> strings = mnemonicCode.toMnemonic(random);
+            byte[] bytes = mnemonicCode.toEntropy(strings);
+
+            byte[] seed = MnemonicCode.toSeed(mnemonicWordsInAList, "");
+
 //            ExtendedKey extendedKey = ExtendedKey.create(seed);
 //            AddressIndex address = BIP44.m().purpose44()
 //                    .coinType(1)
@@ -188,6 +194,12 @@ public class MainActivity extends AppCompatActivity {
 
 
         } catch (ValidationException e) {
+            e.printStackTrace();
+        } catch (MnemonicException.MnemonicLengthException e) {
+            e.printStackTrace();
+        } catch (MnemonicException.MnemonicChecksumException e) {
+            e.printStackTrace();
+        } catch (MnemonicException.MnemonicWordException e) {
             e.printStackTrace();
         }
 
