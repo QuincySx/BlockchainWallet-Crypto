@@ -32,18 +32,11 @@ import java.util.List;
  * <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki">the BIP 39
  * specification</a>
  */
-
-
 public class MnemonicCode {
     private static final String TAG = MnemonicCode.class.getSimpleName();
 
     //默认为英文
     private WordList wordList = English.INSTANCE;
-
-//    private ArrayList<String> wordList;
-
-    private static String BIP39_ENGLISH_SHA256 =
-            "ad90bf3beb7b0eb7e5acd74727dc0da96e0a280a258354e7293fb7e211ac03db";
 
     /**
      * UNIX time for when the BIP39 standard was finalised. This can be used as a default seed
@@ -63,126 +56,15 @@ public class MnemonicCode {
         return instance;
     }
 
-//    public static MnemonicCode instanceForWord(MnemonicCode i, String word) {
-//        if (i.getWordList(word) == null) {
-//            return null;
-//        }
-//        i.wordList = i.getWordList(word);
-//        return i;
-//    }
-
-//    public void setWordList(ArrayList<String> wordList, MnemonicWordList mnemonicWordList) {
-//        this.wordList = wordList;
-//        this.mnemonicWordList = mnemonicWordList;
-//    }
-
-//    public void setMnemonicWordList(MnemonicWordList mnemonicWordList) {
-//        ArrayList<String> wordList = getWordList(mnemonicWordList);
-//        if (wordList != null) {
-//            this.wordList = wordList;
-//            this.mnemonicWordList = mnemonicWordList;
-//        }
-//    }
-
-//    private ArrayList<String> getWordList(String word) {
-//        try {
-//            HashMap<MnemonicWordList, InputStream> wordListMap = openWordList();
-//            Iterator iter = wordListMap.entrySet().iterator();
-//            while (iter.hasNext()) {
-//                Map.Entry entry = (Map.Entry) iter.next();
-//                InputStream value = (InputStream) entry.getValue();
-//                ArrayList<String> words = getWordListForInputStream(value);
-//                if (words.contains(word)) {
-//                    MnemonicWordList key = (MnemonicWordList) entry.getKey();
-//                    mnemonicWordList = key;
-//                    return words;
-//                }
-//            }
-//        } catch (IOException e) {
-//            return null;
-//        } catch (IllegalArgumentException e) {
-//            return null;
-//        }
-//        return null;
-//    }
-
-//    private ArrayList<String> getWordList(MnemonicWordList mnemonicWordList) {
-//        try {
-//            HashMap<MnemonicWordList, InputStream> wordListMap = openWordList();
-//            Iterator iter = wordListMap.entrySet().iterator();
-//            while (iter.hasNext()) {
-//                Map.Entry entry = (Map.Entry) iter.next();
-//                Object key = entry.getKey();
-//                if (key.equals(mnemonicWordList)) {
-//                    InputStream value = (InputStream) entry.getValue();
-//                    return getWordListForInputStream(value);
-//                }
-//            }
-//        } catch (IOException e) {
-//            return null;
-//        } catch (IllegalArgumentException e) {
-//            return null;
-//        }
-//        return null;
-//    }
-
     /**
      * Initialise from the included word list. Won't work on Android.
      */
     public MnemonicCode() {
-//        this(BIP39_ENGLISH_SHA256);
     }
 
-//    protected abstract HashMap<MnemonicWordList, InputStream> openWordList() throws IOException,
-//            IllegalArgumentException;
-
-    /**
-     * Creates an MnemonicCode object, initializing with words read from the supplied input
-     * stream.  If a wordListDigest
-     * is supplied the digest of the words will be checked.
-     */
-//    public MnemonicCode(String wordListDigest) throws IOException, IllegalArgumentException {
-//        HashMap<MnemonicWordList, InputStream> wordListMap = openWordList();
-//        Iterator iter = wordListMap.entrySet().iterator();
-//        while (iter.hasNext()) {
-//            Map.Entry entry = (Map.Entry) iter.next();
-//            Object key = entry.getKey();
-//            if (key.equals(mnemonicWordList)) {
-//                InputStream value = (InputStream) entry.getValue();
-//                this.wordList = getWordListForInputStream(value);
-//                return;
-//            }
-//        }
-//    }
     public MnemonicCode(WordList list) {
         wordList = list;
     }
-
-    /**
-     * Gets the word list this code uses.
-     */
-//    public List<String> getWordList() {
-//        return wordList;
-//    }
-
-//    public MnemonicWordList getMnemonicWordList() {
-//        return mnemonicWordList;
-//    }
-//    public ArrayList<String> getWordListForInputStream(InputStream inputStream) throws
-//            IOException, IllegalArgumentException {
-//        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-//        ArrayList<String> words = new ArrayList<String>(2048);
-//        String word;
-//        while ((word = br.readLine()) != null) {
-//            words.add(word);
-//        }
-//        br.close();
-//
-//        if (words.size() != 2048) {
-//            throw new IllegalArgumentException("input stream did not contain 2048 words");
-//        }
-//        return words;
-//    }
 
     /**
      * Convert mnemonic word list to seed.

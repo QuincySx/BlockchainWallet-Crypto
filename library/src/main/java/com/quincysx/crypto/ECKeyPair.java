@@ -18,10 +18,6 @@ package com.quincysx.crypto;
 import com.quincysx.crypto.bip32.ValidationException;
 import com.quincysx.crypto.utils.RIPEMD160;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.SecureRandom;
-
 import org.spongycastle.asn1.ASN1InputStream;
 import org.spongycastle.asn1.DERInteger;
 import org.spongycastle.asn1.DLSequence;
@@ -37,12 +33,18 @@ import org.spongycastle.crypto.signers.ECDSASigner;
 import org.spongycastle.math.ec.ECPoint;
 import org.spongycastle.util.Arrays;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.SecureRandom;
+
 
 public class ECKeyPair implements Key {
     protected static final SecureRandom secureRandom = new SecureRandom();
     protected static final X9ECParameters CURVE = SECNamedCurves.getByName("secp256k1");
-    protected static final ECDomainParameters domain = new ECDomainParameters(CURVE.getCurve(), CURVE.getG(), CURVE.getN(), CURVE.getH());
-    protected static final BigInteger LARGEST_PRIVATE_KEY = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+    protected static final ECDomainParameters domain = new ECDomainParameters(CURVE.getCurve(),
+            CURVE.getG(), CURVE.getN(), CURVE.getH());
+    protected static final BigInteger LARGEST_PRIVATE_KEY = new BigInteger
+            ("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
 
     protected BigInteger priv;
     protected byte[] pub;
@@ -69,10 +71,10 @@ public class ECKeyPair implements Key {
     }
 
     protected ECKeyPair(Key keyPair) {
-        this.priv = new BigInteger(1, keyPair.getPrivate());
+        this.priv = new BigInteger(1, keyPair.getRawPrivateKey());
         this.compressed = keyPair.isCompressed();
-        this.pub = keyPair.getPublic();
-        this.pubComp = keyPair.getCompPublic();
+        this.pub = Arrays.clone(keyPair.getRawPublicKey(false));
+        this.pubComp = Arrays.clone(keyPair.getRawPublicKey());
     }
 
     @Override
@@ -92,7 +94,8 @@ public class ECKeyPair implements Key {
 
     public static ECKeyPair createNew(boolean compressed) {
         ECKeyPairGenerator generator = new ECKeyPairGenerator();
-        ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(domain, secureRandom);
+        ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(domain,
+                secureRandom);
         generator.init(keygenParams);
         AsymmetricCipherKeyPair keypair = generator.generateKeyPair();
         ECPrivateKeyParameters privParams = (ECPrivateKeyParameters) keypair.getPrivate();
@@ -111,30 +114,50 @@ public class ECKeyPair implements Key {
     }
 
     @Override
-    public byte[] getPrivate() {
+    public byte[] getRawPrivateKey() {
         byte[] p = priv.toByteArray();
 
         if (p.length != 32) {
             byte[] tmp = new byte[32];
-            System.arraycopy(p, Math.max(0, p.length - 32), tmp, Math.max(0, 32 - p.length), Math.min(32, p.length));
+            System.arraycopy(p, Math.max(0, p.length - 32), tmp, Math.max(0, 32 - p.length), Math
+                    .min(32, p.length));
             p = tmp;
         }
         return p;
     }
 
     @Override
-    public byte[] getPublic() {
-        return Arrays.clone(pub);
+    public byte[] getRawPublicKey(boolean isCompressed) {
+        if (isCompressed) {
+            return Arrays.clone(pubComp);
+        } else {
+            return Arrays.clone(pub);
+        }
     }
 
     @Override
-    public byte[] getCompPublic() {
-        return Arrays.clone(pubComp);
+    public byte[] getRawPublicKey() {
+        return getRawPublicKey(true);
     }
 
     @Override
-    public byte[] getAddress() {
+    public byte[] getRawAddress() {
         return RIPEMD160.hash160(pubComp);
+    }
+
+    @Override
+    public String getPrivateKey() {
+        throw new RuntimeException("No formatted private Key");
+    }
+
+    @Override
+    public String getPublicKey() {
+        throw new RuntimeException("No formatted public Key");
+    }
+
+    @Override
+    public String getAddress() {
+        throw new RuntimeException("No formatted address");
     }
 
     @Override
@@ -146,7 +169,8 @@ public class ECKeyPair implements Key {
         ASN1InputStream asn1 = new ASN1InputStream(signature);
         try {
             ECDSASigner signer = new ECDSASigner();
-            signer.init(false, new ECPublicKeyParameters(CURVE.getCurve().decodePoint(pub), domain));
+            signer.init(false, new ECPublicKeyParameters(CURVE.getCurve().decodePoint(pub),
+                    domain));
 
             DLSequence seq = (DLSequence) asn1.readObject();
             BigInteger r = ((DERInteger) seq.getObjectAt(0)).getPositiveValue();

@@ -15,6 +15,17 @@
  */
 package com.quincysx.crypto.bip32;
 
+import com.quincysx.crypto.ECKeyPair;
+import com.quincysx.crypto.ECPublicKey;
+import com.quincysx.crypto.Key;
+import com.quincysx.crypto.utils.Base58Check;
+
+import org.spongycastle.asn1.sec.SECNamedCurves;
+import org.spongycastle.asn1.x9.X9ECParameters;
+import org.spongycastle.crypto.generators.SCrypt;
+import org.spongycastle.math.ec.ECPoint;
+import org.spongycastle.util.Arrays;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -34,17 +45,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.spongycastle.asn1.sec.SECNamedCurves;
-import org.spongycastle.asn1.x9.X9ECParameters;
-import org.spongycastle.crypto.generators.SCrypt;
-import org.spongycastle.math.ec.ECPoint;
-import org.spongycastle.util.Arrays;
-
-import com.quincysx.crypto.ECKeyPair;
-import com.quincysx.crypto.ECPublicKey;
-import com.quincysx.crypto.Key;
-import com.quincysx.crypto.utils.Base58Check;
-
 /**
  * Key Generator following BIP32 https://en.bitcoin.it/wiki/BIP_0032
  */
@@ -60,9 +60,11 @@ public class ExtendedKey {
 
     private static final byte[] BITCOIN_SEED = "Bitcoin seed".getBytes();
 
-    public static ExtendedKey createFromPassphrase(String passphrase, byte[] encrypted) throws ValidationException {
+    public static ExtendedKey createFromPassphrase(String passphrase, byte[] encrypted) throws
+            ValidationException {
         try {
-            byte[] key = SCrypt.generate(passphrase.getBytes("UTF-8"), BITCOIN_SEED, 16384, 8, 8, 32);
+            byte[] key = SCrypt.generate(passphrase.getBytes("UTF-8"), BITCOIN_SEED, 16384, 8, 8,
+                    32);
             SecretKeySpec keyspec = new SecretKeySpec(key, "AES");
             if (encrypted.length == 32) {
                 // asssume encrypted is seed
@@ -98,7 +100,8 @@ public class ExtendedKey {
 
     public byte[] encrypt(String passphrase, boolean production) throws ValidationException {
         try {
-            byte[] key = SCrypt.generate(passphrase.getBytes("UTF-8"), BITCOIN_SEED, 16384, 8, 8, 32);
+            byte[] key = SCrypt.generate(passphrase.getBytes("UTF-8"), BITCOIN_SEED, 16384, 8, 8,
+                    32);
             SecretKeySpec keyspec = new SecretKeySpec(key, "AES");
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC");
             cipher.init(Cipher.ENCRYPT_MODE, keyspec);
@@ -108,7 +111,8 @@ public class ExtendedKey {
             System.arraycopy(iv, 0, result, 0, iv.length);
             System.arraycopy(c, 0, result, iv.length, c.length);
             return result;
-        } catch (UnsupportedEncodingException | NoSuchAlgorithmException | NoSuchProviderException | NoSuchPaddingException | InvalidKeyException
+        } catch (UnsupportedEncodingException | NoSuchAlgorithmException |
+                NoSuchProviderException | NoSuchPaddingException | InvalidKeyException
                 | IllegalBlockSizeException | BadPaddingException e) {
             throw new ValidationException(e);
         }
@@ -174,7 +178,7 @@ public class ExtendedKey {
 
     public int getFingerPrint() {
         int fingerprint = 0;
-        byte[] address = master.getAddress();
+        byte[] address = master.getRawAddress();
         for (int i = 0; i < 4; ++i) {
             fingerprint <<= 8;
             fingerprint |= address[i] & 0xff;
@@ -188,20 +192,22 @@ public class ExtendedKey {
 
     public ExtendedKey getChild(int sequence) throws ValidationException {
         ExtendedKey sub = generateKey(sequence);
-        return new ExtendedKey(sub.getMaster(), sub.getChainCode(), sub.getDepth() + 1, getFingerPrint(), sequence);
+        return new ExtendedKey(sub.getMaster(), sub.getChainCode(), sub.getDepth() + 1,
+                getFingerPrint(), sequence);
     }
 
     public ExtendedKey getReadOnly() {
-        return new ExtendedKey(new ECPublicKey(master.getCompPublic(), true), chainCode, depth, parent, sequence);
+        return new ExtendedKey(new ECPublicKey(master.getRawPublicKey(), true), chainCode, depth,
+                parent, sequence);
     }
 
     public boolean isReadOnly() {
-        return master.getPrivate() == null;
+        return master.getRawPrivateKey() == null;
     }
 
     private ExtendedKey generateKey(int sequence) throws ValidationException {
         try {
-            if ((sequence & 0x80000000) != 0 && master.getPrivate() == null) {
+            if ((sequence & 0x80000000) != 0 && master.getRawPrivateKey() == null) {
                 throw new ValidationException("need private key for private generation");
             }
             Mac mac = Mac.getInstance("HmacSHA512", "BC");
@@ -209,7 +215,7 @@ public class ExtendedKey {
             mac.init(key);
 
             byte[] extended;
-            byte[] pub = master.getCompPublic();
+            byte[] pub = master.getRawPublicKey();
             if ((sequence & 0x80000000) == 0) {
                 extended = new byte[pub.length + 4];
                 System.arraycopy(pub, 0, extended, 0, pub.length);
@@ -218,7 +224,7 @@ public class ExtendedKey {
                 extended[pub.length + 2] = (byte) ((sequence >>> 8) & 0xff);
                 extended[pub.length + 3] = (byte) (sequence & 0xff);
             } else {
-                byte[] priv = master.getPrivate();
+                byte[] priv = master.getRawPrivateKey();
                 extended = new byte[priv.length + 5];
                 System.arraycopy(priv, 0, extended, 1, priv.length);
                 extended[priv.length + 1] = (byte) ((sequence >>> 24) & 0xff);
@@ -234,16 +240,19 @@ public class ExtendedKey {
             if (m.compareTo(curve.getN()) >= 0) {
                 throw new ValidationException("This is rather unlikely, but it did just happen");
             }
-            if (master.getPrivate() != null) {
-                BigInteger k = m.add(new BigInteger(1, master.getPrivate())).mod(curve.getN());
+            if (master.getRawPrivateKey() != null) {
+                BigInteger k = m.add(new BigInteger(1, master.getRawPrivateKey())).mod(curve.getN
+                        ());
                 if (k.equals(BigInteger.ZERO)) {
-                    throw new ValidationException("This is rather unlikely, but it did just happen");
+                    throw new ValidationException("This is rather unlikely, but it did just " +
+                            "happen");
                 }
                 return new ExtendedKey(new ECKeyPair(k, true), r, depth, parent, sequence);
             } else {
                 ECPoint q = curve.getG().multiply(m).add(curve.getCurve().decodePoint(pub));
                 if (q.isInfinity()) {
-                    throw new ValidationException("This is rather unlikely, but it did just happen");
+                    throw new ValidationException("This is rather unlikely, but it did just " +
+                            "happen");
                 }
                 pub = new ECPoint.Fp(curve.getCurve(), q.getX(), q.getY(), true).getEncoded();
                 return new ExtendedKey(new ECPublicKey(pub, true), r, depth, parent, sequence);
@@ -265,7 +274,7 @@ public class ExtendedKey {
     public String serialize(boolean production) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
-            if (master.getPrivate() != null) {
+            if (master.getRawPrivateKey() != null) {
                 if (production) {
                     out.write(xprv);
                 } else {
@@ -288,11 +297,11 @@ public class ExtendedKey {
             out.write((sequence >>> 8) & 0xff);
             out.write(sequence & 0xff);
             out.write(chainCode);
-            if (master.getPrivate() != null) {
+            if (master.getRawPrivateKey() != null) {
                 out.write(0x00);
-                out.write(master.getPrivate());
+                out.write(master.getRawPrivateKey());
             } else {
-                out.write(master.getCompPublic());
+                out.write(master.getRawPublicKey());
             }
         } catch (IOException e) {
         }

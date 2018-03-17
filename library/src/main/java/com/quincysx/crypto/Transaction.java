@@ -7,7 +7,7 @@ import com.quincysx.crypto.bip32.ValidationException;
  * @date 2018/3/8 下午1:56
  */
 public interface Transaction {
-    void sign(ECKeyPair key) throws ValidationException;
+    byte[] sign(ECKeyPair key) throws ValidationException;
 
     public byte[] getSignBytes();
 

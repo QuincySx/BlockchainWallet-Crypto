@@ -1,7 +1,7 @@
 package com.quincysx.crypto;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.quincysx.crypto.bip32.ExtendedKey;
@@ -15,8 +15,6 @@ import com.quincysx.crypto.bip44.AddressIndex;
 import com.quincysx.crypto.bip44.BIP44;
 import com.quincysx.crypto.bip44.CoinPairDerive;
 import com.quincysx.crypto.bitcoin.BitCoinECKeyPair;
-import com.quincysx.crypto.ethereum.EthECKeyPair;
-import com.quincysx.crypto.utils.HexUtils;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -108,46 +106,38 @@ public class MainActivity extends AppCompatActivity {
 //                    .address(0);
 //            CoinPairDerive coinKeyPair = new CoinPairDerive(extendedKey);
 //            ExtendedKey master = coinKeyPair.deriveByExtendedKey(address);
-//            CoinKeyPair bitcoinKeyPair = coinKeyPair.convertEthKeyPair(new BigInteger(1, master.getMaster().getPrivate()));
+//            CoinKeyPair bitcoinKeyPair = coinKeyPair.convertEthKeyPair(new BigInteger(1, master
+// .getMaster().getPrivate()));
 
             Log.e("=1221=", "==========开始============");
 
             ExtendedKey extendedKey = ExtendedKey.create(seed);
             AddressIndex address = BIP44.m().purpose44()
-                    .coinType(0)
+                    .coinType(60)
                     .account(0)
                     .external()
                     .address(0);
             CoinPairDerive coinKeyPair = new CoinPairDerive(extendedKey);
             ECKeyPair master = coinKeyPair.derive(address);
 
-            if (master instanceof BitCoinECKeyPair) {
-                BitCoinECKeyPair bitCoinECKeyPair = (BitCoinECKeyPair) master;
-                Log.e("=1221=", "======================");
-                Log.e("=1221private", bitCoinECKeyPair.getWIFPrivateKey());
-                Log.e("=1221public=", HexUtils.toHex(bitCoinECKeyPair.getPublic()));
-                Log.e("=1221address=", bitCoinECKeyPair.getStrAddress());
-                Log.e("=1221=", "======================");
+            Log.e("=1221=", "======================");
+            Log.e("=1221private", master.getPrivateKey());
+            Log.e("=1221public=", master.getPublicKey());
+            Log.e("=1221address=", master.getAddress());
+            Log.e("=1221=", "======================");
 
+            if (master instanceof BitCoinECKeyPair) {
                 try {
-                    String s = Bip38.encryptNoEcMultiply("123456", bitCoinECKeyPair.getWIFPrivateKey());
+                    String s = Bip38.encryptNoEcMultiply("123456", master
+                            .getPrivateKey());
                     Log.e("=====", s);
                     BitCoinECKeyPair s1 = Bip38.decrypt(s, "123456");
 
-                    Log.e("=====", s1.getWIFPrivateKey());
+                    Log.e("=====", s1.getPrivateKey());
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
-            } else if (master instanceof EthECKeyPair) {
-                EthECKeyPair ethECKeyPair = (EthECKeyPair) master;
-                Log.e("=12221=", "======================");
-                Log.e("=12221private", HexUtils.toHex(ethECKeyPair.getPrivate()));
-                Log.e("=12221public=", HexUtils.toHex(ethECKeyPair.getPublic()));
-                Log.e("=12221address=", HexUtils.toHex(ethECKeyPair.getAddress()));
-                Log.e("=12221=", "======================");
             }
-
 
             //普通上链签名=========
             BigInteger nonce = new BigInteger("12");
@@ -170,8 +160,10 @@ public class MainActivity extends AppCompatActivity {
 
 
 //            //调用合约查余额====
-//            EthTransaction txConst = CallTransaction.createCallTransaction(nonce.longValue(), gasPrice.longValue(), gasLimit.longValue(),
-//                    "6b3b3386f46d2872a4bbfda001cebc7dec844593", 0, CallTransaction.Function.fromSignature("balanceOf","address"),"cAfEE4583441D2682bEa06b6E8bFA722a7cea848");
+//            EthTransaction txConst = CallTransaction.createCallTransaction(nonce.longValue(),
+// gasPrice.longValue(), gasLimit.longValue(),
+//                    "6b3b3386f46d2872a4bbfda001cebc7dec844593", 0, CallTransaction.Function
+// .fromSignature("balanceOf","address"),"cAfEE4583441D2682bEa06b6E8bFA722a7cea848");
 //            txConst.sign((ECKeyPair) master.getMaster());
 //            byte[] data = txConst.getData();
 //            byte[] rawHash = txConst.getEncoded();
@@ -180,10 +172,12 @@ public class MainActivity extends AppCompatActivity {
 //            Log.e("====签名===", HexUtils.toHex(rawHash));
 
             //转 Token
-//            Transaction txConst = CallTransaction.createCallTransaction(nonce.longValue(), gasPrice.longValue(), gasLimit.longValue(),
+//            Transaction txConst = CallTransaction.createCallTransaction(nonce.longValue(),
+// gasPrice.longValue(), gasLimit.longValue(),
 //                    "6b3b3386f46d2872a4bbfda001cebc7dec844593", 0,
 //                    CallTransaction.Function.fromSignature("transfer",
-//                            "address", "uint256"), "4de1f8192dc059cc15f7ba2a045082263cfd1644", 100000000000000000L);
+//                            "address", "uint256"), "4de1f8192dc059cc15f7ba2a045082263cfd1644",
+// 100000000000000000L);
 //
 //            txConst.sign(master);
 //            byte[] data = txConst.getData();

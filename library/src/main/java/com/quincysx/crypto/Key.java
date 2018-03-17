@@ -19,14 +19,61 @@ package com.quincysx.crypto;
 import com.quincysx.crypto.bip32.ValidationException;
 
 public interface Key extends Cloneable {
-    public byte[] getPrivate();
+    /**
+     * 获取原生私钥
+     *
+     * @return
+     */
+    public byte[] getRawPrivateKey();
 
-    public byte[] getPublic();
+    /**
+     * 获取公钥
+     *
+     * @param isCompressed 是否压缩
+     * @return 原生公钥
+     */
+    public byte[] getRawPublicKey(boolean isCompressed);
 
-    public byte[] getCompPublic();
+    /**
+     * 获取原生压缩公钥
+     *
+     * @return
+     */
+    public byte[] getRawPublicKey();
 
-    public byte[] getAddress();
+    /**
+     * 获取地址
+     *
+     * @return
+     */
+    public byte[] getRawAddress();
 
+    /**
+     * 获取格式化的私钥
+     *
+     * @return
+     */
+    public String getPrivateKey();
+
+    /**
+     * 获取格式化的公钥
+     *
+     * @return
+     */
+    public String getPublicKey();
+
+    /**
+     * 获取格式化的地址
+     *
+     * @return
+     */
+    public String getAddress();
+
+    /**
+     * 获取判断公钥是否是压缩格式
+     *
+     * @return
+     */
     public boolean isCompressed();
 
     public Key clone() throws CloneNotSupportedException;

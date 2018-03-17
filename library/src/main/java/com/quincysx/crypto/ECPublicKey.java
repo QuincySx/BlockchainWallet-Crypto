@@ -16,7 +16,6 @@
 package com.quincysx.crypto;
 
 
-import com.quincysx.crypto.bip32.ValidationException;
 import com.quincysx.crypto.utils.RIPEMD160;
 
 import org.spongycastle.util.Arrays;
@@ -40,13 +39,41 @@ public class ECPublicKey implements Key {
     }
 
     @Override
-    public byte[] getAddress() {
+    public byte[] getRawPrivateKey() {
+        throw new RuntimeException("Please use private key to sign signature");
+    }
+
+    @Override
+    public byte[] getRawPublicKey(boolean isCompressed) {
+        if (!isCompressed) {
+            throw new RuntimeException("No compressed public key");
+        }
+        return Arrays.clone(pub);
+    }
+
+    @Override
+    public byte[] getRawPublicKey() {
+        return Arrays.clone(pub);
+    }
+
+    @Override
+    public byte[] getRawAddress() {
         return RIPEMD160.hash160(pub);
     }
 
     @Override
-    public byte[] getCompPublic() {
-        return Arrays.clone(pub);
+    public String getPrivateKey() {
+        throw new RuntimeException("Please use private key to sign signature");
+    }
+
+    @Override
+    public String getPublicKey() {
+        throw new RuntimeException("No formatted public Key");
+    }
+
+    @Override
+    public String getAddress() {
+        throw new RuntimeException("No formatted address");
     }
 
     @Override
@@ -59,16 +86,6 @@ public class ECPublicKey implements Key {
     @Override
     public <T> T sign(byte[] messageHash) {
         throw new RuntimeException("Please use private key to sign signature");
-    }
-
-    @Override
-    public byte[] getPrivate() {
-        return null;
-    }
-
-    @Override
-    public byte[] getPublic() {
-        return Arrays.clone(pub);
     }
 
 }

@@ -44,7 +44,8 @@ public class BitCoinECKeyPair extends ECKeyPair {
         return new BitCoinECKeyPair(keyPair, testNet);
     }
 
-    public BitCoinECKeyPair(byte[] p, boolean testNet, boolean compressed) throws ValidationException {
+    public BitCoinECKeyPair(byte[] p, boolean testNet, boolean compressed) throws
+            ValidationException {
         super(p, compressed);
         this.testNet = testNet;
     }
@@ -69,20 +70,40 @@ public class BitCoinECKeyPair extends ECKeyPair {
     }
 
     @Override
-    public byte[] getPublic() {
-        if (isCompressed()) {
-            return super.getCompPublic();
-        } else {
-            return super.getPublic();
-        }
-    }
+    public String getPrivateKey() {
+        byte[] bytes = getRawPrivateKey();
+        byte[] rawPrivateKey = new byte[isCompressed() ? RAW_PRIVATE_KEY_COMPRESSED_LENGTH :
+                RAW_PRIVATE_KEY_NO_COMPRESSED_LENGTH];
+        System.arraycopy(bytes, 0, rawPrivateKey, 1, bytes.length);
 
-    public String getStrAddress() {
-        return Base58.encode(getAddress());
+        rawPrivateKey[0] = (byte) (isTestNet() ? TEST_NET_PRIVATE_KEY_PREFIX :
+                MAIN_NET_PRIVATE_KEY_PREFIX);
+        if (isCompressed()) {
+            rawPrivateKey[rawPrivateKey.length - 5] = MAIN_NET_PRIVATE_KEY_SUFFIX;
+        }
+
+        byte[] check = SHA256.doubleSha256(rawPrivateKey, 0, rawPrivateKey.length - 4);
+        System.arraycopy(check, 0, rawPrivateKey, rawPrivateKey.length - 4, 4);
+        return Base58.encode(rawPrivateKey);
     }
 
     @Override
-    public byte[] getAddress() {
+    public String getPublicKey() {
+        return HexUtils.toHex(getRawPublicKey());
+    }
+
+    @Override
+    public String getAddress() {
+        return Base58.encode(getRawAddress());
+    }
+
+    @Override
+    public byte[] getRawPublicKey() {
+        return getRawPublicKey(isCompressed());
+    }
+
+    @Override
+    public byte[] getRawAddress() {
         byte[] hashedPublicKey;
         //进行 Sha256 Ripemd160 运算
         if (isCompressed()) {
@@ -110,7 +131,7 @@ public class BitCoinECKeyPair extends ECKeyPair {
     public BTCTransaction sign(byte[] messageHash) throws ValidationException {
         try {
             BTCTransaction btcTransaction = new BTCTransaction(messageHash);
-            return signTransaction(btcTransaction, priv, getPublic(), HexUtils.toHex(getAddress()));
+            return signTransaction(btcTransaction, priv, getRawPublicKey(), getAddress());
         } catch (BitcoinException e) {
             e.printStackTrace();
             throw new ValidationException(e);
@@ -135,21 +156,6 @@ public class BitCoinECKeyPair extends ECKeyPair {
 
     public boolean verifyBTC(byte[] hash, byte[] signature) {
         return verify(hash, signature, pubComp);
-    }
-
-    public String getWIFPrivateKey() {
-        byte[] bytes = getPrivate();
-        byte[] rawPrivateKey = new byte[isCompressed() ? RAW_PRIVATE_KEY_COMPRESSED_LENGTH : RAW_PRIVATE_KEY_NO_COMPRESSED_LENGTH];
-        System.arraycopy(bytes, 0, rawPrivateKey, 1, bytes.length);
-
-        rawPrivateKey[0] = (byte) (isTestNet() ? TEST_NET_PRIVATE_KEY_PREFIX : MAIN_NET_PRIVATE_KEY_PREFIX);
-        if (isCompressed()) {
-            rawPrivateKey[rawPrivateKey.length - 5] = MAIN_NET_PRIVATE_KEY_SUFFIX;
-        }
-
-        byte[] check = SHA256.doubleSha256(rawPrivateKey, 0, rawPrivateKey.length - 4);
-        System.arraycopy(check, 0, rawPrivateKey, rawPrivateKey.length - 4, 4);
-        return Base58.encode(rawPrivateKey);
     }
 
     public static ECKeyPair parseWIF(String serialized) throws ValidationException {
@@ -185,10 +191,12 @@ public class BitCoinECKeyPair extends ECKeyPair {
         }
     }
 
-    public static BTCTransaction signTransaction(BTCTransaction transaction, BigInteger privateKeyBigInteger, byte[] publicKey, String address) {
+    public static BTCTransaction signTransaction(BTCTransaction transaction, BigInteger
+            privateKeyBigInteger, byte[] publicKey, String address) {
         BTCTransaction.Input[] signedInput = new BTCTransaction.Input[transaction.inputs.length];
         for (int i = 0; i < transaction.inputs.length; i++) {
-            signedInput[i] = sign(transaction, i, privateKeyBigInteger, publicKey, address, BTCTransaction.Script.SIGHASH_ALL);
+            signedInput[i] = sign(transaction, i, privateKeyBigInteger, publicKey, address,
+                    BTCTransaction.Script.SIGHASH_ALL);
         }
         return new BTCTransaction(signedInput, transaction.outputs, transaction.lockTime);
     }
@@ -200,13 +208,15 @@ public class BitCoinECKeyPair extends ECKeyPair {
      * @param index       Input索引
      * @reture 签名完毕的Input
      */
-    public static BTCTransaction.Input sign(BTCTransaction transaction, int index, BigInteger privateKeyBigInteger, byte[] publicKey, String address, byte ScriptType) {
+    public static BTCTransaction.Input sign(BTCTransaction transaction, int index, BigInteger
+            privateKeyBigInteger, byte[] publicKey, String address, byte ScriptType) {
         String publicScript = mkPubKeyScript(address);
         //清空无关Input的Script,对相关Script进行签名
         signatureForm(transaction, index, publicScript);
 
         //双 Sha256 and 签名
-        byte[] signature = sign(privateKeyBigInteger, BTCTransaction.Script.hashTransactionForSigning(transaction));
+        byte[] signature = sign(privateKeyBigInteger, BTCTransaction.Script
+                .hashTransactionForSigning(transaction));
 
         //拼版本
         byte[] signatureAndHashType = new byte[signature.length + 1];
@@ -214,7 +224,8 @@ public class BitCoinECKeyPair extends ECKeyPair {
         signatureAndHashType[signatureAndHashType.length - 1] = ScriptType;
 
         //拼出新的input
-        return new BTCTransaction.Input(transaction.inputs[index].outPoint, new BTCTransaction.Script(signatureAndHashType, publicKey), transaction.inputs[index].sequence);
+        return new BTCTransaction.Input(transaction.inputs[index].outPoint, new BTCTransaction
+                .Script(signatureAndHashType, publicKey), transaction.inputs[index].sequence);
     }
 
     /**
@@ -225,7 +236,8 @@ public class BitCoinECKeyPair extends ECKeyPair {
      * @param publicScript 地址签名
      * @return 新的交易
      */
-    private static BTCTransaction signatureForm(BTCTransaction transaction, int index, String publicScript) {
+    private static BTCTransaction signatureForm(BTCTransaction transaction, int index, String
+            publicScript) {
         //存放清空地址签名的Input
         for (int i = 0; i < transaction.inputs.length; i++) {
             BTCTransaction.Script script = null;
@@ -233,7 +245,8 @@ public class BitCoinECKeyPair extends ECKeyPair {
                 //设置地址签名
                 script = new BTCTransaction.Script(HexUtils.fromHex(publicScript));
             }
-            transaction.inputs[i] = new BTCTransaction.Input(transaction.inputs[i].outPoint, script, transaction.inputs[i].sequence);
+            transaction.inputs[i] = new BTCTransaction.Input(transaction.inputs[i].outPoint,
+                    script, transaction.inputs[i].sequence);
         }
         return transaction;
     }
@@ -271,9 +284,12 @@ public class BitCoinECKeyPair extends ECKeyPair {
             BigInteger[] sign = signer.generateSignature(input);
             BigInteger r = sign[0];
             BigInteger s = sign[1];
-            BigInteger largestAllowedS = new BigInteger("7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0", 16);//SECP256K1_N_DIV_2
+            BigInteger largestAllowedS = new BigInteger
+                    ("7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0", 16);
+            //SECP256K1_N_DIV_2
             if (s.compareTo(largestAllowedS) > 0) {
-                //https://github.com/bitcoin/bips/blob/master/bip-0062.mediawiki#low-s-values-in-signatures
+                //https://github.com/bitcoin/bips/blob/master/bip-0062.mediawiki#low-s-values-in
+                // -signatures
                 s = LARGEST_PRIVATE_KEY.subtract(s);
             }
             try {

@@ -7,8 +7,6 @@ import com.quincysx.crypto.utils.Base58;
 import com.quincysx.crypto.utils.HexUtils;
 import com.quincysx.crypto.utils.SHA256;
 
-import org.spongycastle.asn1.sec.SECNamedCurves;
-import org.spongycastle.asn1.x9.X9ECParameters;
 import org.spongycastle.crypto.generators.SCrypt;
 
 import java.math.BigInteger;
@@ -70,7 +68,7 @@ public class Bip38 {
 
         BitCoinECKeyPair bitCoinECKeyPair = new BitCoinECKeyPair(bytes, testNet, compressed);
 
-        byte[] salt = Bip38.calculateScryptSalt(bitCoinECKeyPair.getStrAddress());
+        byte[] salt = Bip38.calculateScryptSalt(bitCoinECKeyPair.getAddress());
         byte[] stretchedKeyMaterial = bip38Stretch1(passphrase, salt, SCRYPT_LENGTH);
 
         return encryptNoEcMultiply(stretchedKeyMaterial, bitCoinECKeyPair, salt);
@@ -139,7 +137,7 @@ public class Bip38 {
         aes.makeKey(derivedHalf2, 256);
 
         // Get private key bytes
-        byte[] complete = key.getPrivate();
+        byte[] complete = key.getRawPrivateKey();
 
         // Insert first encrypted key part
         byte[] toEncryptPart1 = new byte[16];
@@ -303,7 +301,7 @@ public class Bip38 {
         // Determine Pass Point
 
         BitCoinECKeyPair bitCoinECKeyPair = new BitCoinECKeyPair(passFactor, false, bip38Key.compressed);
-        byte[] passPoint = bitCoinECKeyPair.getPublic();
+        byte[] passPoint = bitCoinECKeyPair.getRawPublicKey();
 
         // Get 8 byte encrypted part 1, only first half of encrypted part 1
         // (the rest is encrypted within encryptedpart2)
@@ -406,7 +404,7 @@ public class Bip38 {
     private static BitCoinECKeyPair verify(byte[] complete, byte[] salt, boolean testNet, boolean compress) throws ValidationException {
         BitCoinECKeyPair bitCoinECKeyPair = new BitCoinECKeyPair(complete, testNet, compress);
 
-        byte[] newSalt = calculateScryptSalt(bitCoinECKeyPair.getStrAddress());
+        byte[] newSalt = calculateScryptSalt(bitCoinECKeyPair.getAddress());
         if (!java.util.Arrays.equals(salt, newSalt)) {
             // The passphrase is either invalid or we are on the wrong network
             return null;

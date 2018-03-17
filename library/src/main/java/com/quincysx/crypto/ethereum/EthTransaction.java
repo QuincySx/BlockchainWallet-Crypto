@@ -29,11 +29,11 @@ import com.quincysx.crypto.ethereum.rlp.RLPList;
 import com.quincysx.crypto.ethereum.utils.ByteUtil;
 import com.quincysx.crypto.utils.KECCAK256;
 
-import java.math.BigInteger;
-import java.util.Arrays;
-
 import org.spongycastle.util.BigIntegers;
 import org.spongycastle.util.encoders.Hex;
+
+import java.math.BigInteger;
+import java.util.Arrays;
 
 import static com.cedarsoftware.util.ArrayUtilities.isEmpty;
 import static com.quincysx.crypto.ethereum.utils.ByteUtil.EMPTY_BYTE_ARRAY;
@@ -109,7 +109,8 @@ public class EthTransaction implements Transaction {
         parsed = false;
     }
 
-    public EthTransaction(byte[] nonce, byte[] gasPrice, byte[] gasLimit, byte[] receiveAddress, byte[] value, byte[] data,
+    public EthTransaction(byte[] nonce, byte[] gasPrice, byte[] gasLimit, byte[] receiveAddress,
+                          byte[] value, byte[] data,
                           Integer chainId) {
         this.nonce = nonce;
         this.gasPrice = gasPrice;
@@ -132,14 +133,17 @@ public class EthTransaction implements Transaction {
 
     /**
      * Warning: this transaction would not be protected by replay-attack protection mechanism
-     * Use {@link EthTransaction#EthTransaction(byte[], byte[], byte[], byte[], byte[], byte[], Integer)} constructor instead
+     * Use
+     * {@link EthTransaction#EthTransaction(byte[], byte[], byte[], byte[], byte[], byte[], Integer)} constructor instead
      * and specify the desired chainID
      */
-    public EthTransaction(byte[] nonce, byte[] gasPrice, byte[] gasLimit, byte[] receiveAddress, byte[] value, byte[] data) {
+    public EthTransaction(byte[] nonce, byte[] gasPrice, byte[] gasLimit, byte[] receiveAddress,
+                          byte[] value, byte[] data) {
         this(nonce, gasPrice, gasLimit, receiveAddress, value, data, null);
     }
 
-    public EthTransaction(byte[] nonce, byte[] gasPrice, byte[] gasLimit, byte[] receiveAddress, byte[] value, byte[] data,
+    public EthTransaction(byte[] nonce, byte[] gasPrice, byte[] gasLimit, byte[] receiveAddress,
+                          byte[] value, byte[] data,
                           byte[] r, byte[] s, byte v, Integer chainId) {
         this(nonce, gasPrice, gasLimit, receiveAddress, value, data, chainId);
         this.signature = ECDSASignature.fromComponents(r, s, v);
@@ -147,10 +151,12 @@ public class EthTransaction implements Transaction {
 
     /**
      * Warning: this transaction would not be protected by replay-attack protection mechanism
-     * Use {@link EthTransaction#EthTransaction(byte[], byte[], byte[], byte[], byte[], byte[], byte[], byte[], byte, Integer)}
+     * Use
+     * {@link EthTransaction#EthTransaction(byte[], byte[], byte[], byte[], byte[], byte[], byte[], byte[], byte, Integer)}
      * constructor instead and specify the desired chainID
      */
-    public EthTransaction(byte[] nonce, byte[] gasPrice, byte[] gasLimit, byte[] receiveAddress, byte[] value, byte[] data,
+    public EthTransaction(byte[] nonce, byte[] gasPrice, byte[] gasLimit, byte[] receiveAddress,
+                          byte[] value, byte[] data,
                           byte[] r, byte[] s, byte v) {
         this(nonce, gasPrice, gasLimit, receiveAddress, value, data, r, s, v, null);
     }
@@ -227,7 +233,8 @@ public class EthTransaction implements Transaction {
 
     private void validate() {
         if (getNonce().length > HASH_LENGTH) throw new RuntimeException("Nonce is not valid");
-        if (receiveAddress != null && receiveAddress.length != 0 && receiveAddress.length != ADDRESS_LENGTH)
+        if (receiveAddress != null && receiveAddress.length != 0 && receiveAddress.length !=
+                ADDRESS_LENGTH)
             throw new RuntimeException("Receive address is not valid");
         if (gasLimit.length > HASH_LENGTH)
             throw new RuntimeException("Gas Limit is not valid");
@@ -414,9 +421,10 @@ public class EthTransaction implements Transaction {
 //    }
 
     @Override
-    public void sign(ECKeyPair key) throws ValidationException {
+    public byte[] sign(ECKeyPair key) throws ValidationException {
         this.signature = key.sign(this.getRawHash());
         this.rlpEncoded = null;
+        return getSignBytes();
     }
 
     @Override
@@ -449,8 +457,10 @@ public class EthTransaction implements Transaction {
                 ", value=" + ByteUtil.toHexString(value) +
                 ", data=" + dataS +
                 ", signatureV=" + (signature == null ? "" : signature.v) +
-                ", signatureR=" + (signature == null ? "" : ByteUtil.toHexString(BigIntegers.asUnsignedByteArray(signature.r))) +
-                ", signatureS=" + (signature == null ? "" : ByteUtil.toHexString(BigIntegers.asUnsignedByteArray(signature.s))) +
+                ", signatureR=" + (signature == null ? "" : ByteUtil.toHexString(BigIntegers
+                .asUnsignedByteArray(signature.r))) +
+                ", signatureS=" + (signature == null ? "" : ByteUtil.toHexString(BigIntegers
+                .asUnsignedByteArray(signature.s))) +
                 "]";
     }
 
@@ -559,20 +569,24 @@ public class EthTransaction implements Transaction {
     }
 
     /**
-     * @deprecated Use {@link EthTransaction#createDefault(String, BigInteger, BigInteger, Integer)} instead
+     * @deprecated Use
+     * {@link EthTransaction#createDefault(String, BigInteger, BigInteger, Integer)} instead
      */
     public static EthTransaction createDefault(String to, BigInteger amount, BigInteger nonce) {
         return create(to, amount, nonce, DEFAULT_GAS_PRICE, DEFAULT_BALANCE_GAS);
     }
 
-    public static EthTransaction createDefault(String to, BigInteger amount, BigInteger nonce, Integer chainId) {
+    public static EthTransaction createDefault(String to, BigInteger amount, BigInteger nonce,
+                                               Integer chainId) {
         return create(to, amount, nonce, DEFAULT_GAS_PRICE, DEFAULT_BALANCE_GAS, chainId);
     }
 
     /**
-     * @deprecated use {@link EthTransaction#create(String, BigInteger, BigInteger, BigInteger, BigInteger, Integer)} instead
+     * @deprecated use
+     * {@link EthTransaction#create(String, BigInteger, BigInteger, BigInteger, BigInteger, Integer)} instead
      */
-    public static EthTransaction create(String to, BigInteger amount, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit) {
+    public static EthTransaction create(String to, BigInteger amount, BigInteger nonce,
+                                        BigInteger gasPrice, BigInteger gasLimit) {
         return new EthTransaction(BigIntegers.asUnsignedByteArray(nonce),
                 BigIntegers.asUnsignedByteArray(gasPrice),
                 BigIntegers.asUnsignedByteArray(gasLimit),
@@ -581,7 +595,8 @@ public class EthTransaction implements Transaction {
                 null);
     }
 
-    public static EthTransaction create(String to, BigInteger amount, BigInteger nonce, BigInteger gasPrice,
+    public static EthTransaction create(String to, BigInteger amount, BigInteger nonce,
+                                        BigInteger gasPrice,
                                         BigInteger gasLimit, Integer chainId) {
         return new EthTransaction(BigIntegers.asUnsignedByteArray(nonce),
                 BigIntegers.asUnsignedByteArray(gasPrice),
