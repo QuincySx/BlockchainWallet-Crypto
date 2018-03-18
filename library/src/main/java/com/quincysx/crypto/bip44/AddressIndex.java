@@ -28,7 +28,6 @@ public class AddressIndex {
         this.isHard = head;
     }
 
-
     public int getValue() {
         if (isHard) {
             return Index.hard(addressIndex);

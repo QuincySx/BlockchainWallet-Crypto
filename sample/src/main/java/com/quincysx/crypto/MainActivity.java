@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         mnemonicWordsInAList.add("athlete");
         mnemonicWordsInAList.add("diet");
 
-
+        Log.e("=====","==="+mnemonicWordsInAList.toString());
         try {
             byte[] random = RandomSeed.random(Words.TWELVE);
             MnemonicCode mnemonicCode = new MnemonicCode();

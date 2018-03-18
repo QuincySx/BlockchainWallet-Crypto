@@ -37,20 +37,20 @@ public final class BIP44 {
         Matcher matcher = pattern.matcher(path);
         // 字符串是否与正则表达式相匹配
         if (!matcher.matches()) {
-            throw new RuntimeException("Path format is not correct");
+            throw new NonSupportException("Path format is not correct");
         }
         String[] split = path.split("/");
         String purposeStr = split[1].substring(0, split[1].length() - 1);
         String coinTypeStr = split[2].substring(0, split[2].length() - 1);
         String accountStr = split[3].substring(0, split[3].length() - 1);
         String changeStr = split[4];
-        String addressStr = split[5];
+        String addressStr;
         boolean addressHard = false;
-        if (split[5].indexOf("'") == -1) {
-            addressStr = split[5];
-        } else {
+        if (split[5].contains("'")) {
             addressStr = split[5].substring(0, split[5].length() - 1);
             addressHard = true;
+        } else {
+            addressStr = split[5];
         }
 
         if ((Integer.parseInt(purposeStr)) != 44) {
