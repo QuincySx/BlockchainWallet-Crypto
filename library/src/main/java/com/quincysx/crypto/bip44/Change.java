@@ -35,6 +35,10 @@ public class Change {
      * @return A coin type instance for this purpose, coin type, account and change.
      */
     public AddressIndex address(final int addressIndex) {
-        return new AddressIndex(this, addressIndex);
+        return address(addressIndex, false);
+    }
+
+    public AddressIndex address(final int addressIndex, final boolean hard) {
+        return new AddressIndex(this, addressIndex, hard);
     }
 }

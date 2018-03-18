@@ -1,7 +1,7 @@
 package com.quincysx.crypto.bip44;
 
 
-import com.quincysx.crypto.bip32.Index;
+import com.quincysx.crypto.CoinTypes;
 
 /**
  * @author QuincySx
@@ -9,18 +9,16 @@ import com.quincysx.crypto.bip32.Index;
  */
 public class CoinType {
     private final Purpose purpose;
-    private final int coinType;
+    private final CoinTypes coinType;
     private final String string;
 
-    CoinType(final Purpose purpose, final int coinType) {
-        if (Index.isHardened(coinType))
-            throw new IllegalArgumentException();
+    CoinType(final Purpose purpose, final CoinTypes coinType) {
         this.purpose = purpose;
         this.coinType = coinType;
-        string = String.format("%s/%d'", purpose, coinType);
+        string = String.format("%s/%d'", purpose, coinType.coinType());
     }
 
-    public int getValue() {
+    public CoinTypes getValue() {
         return coinType;
     }
 

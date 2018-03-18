@@ -15,6 +15,8 @@ import com.quincysx.crypto.bip44.AddressIndex;
 import com.quincysx.crypto.bip44.BIP44;
 import com.quincysx.crypto.bip44.CoinPairDerive;
 import com.quincysx.crypto.bitcoin.BitCoinECKeyPair;
+import com.quincysx.crypto.exception.CoinNotFindException;
+import com.quincysx.crypto.exception.NonSupportException;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -113,14 +115,14 @@ public class MainActivity extends AppCompatActivity {
 
             ExtendedKey extendedKey = ExtendedKey.create(seed);
             AddressIndex address = BIP44.m().purpose44()
-                    .coinType(60)
+                    .coinType(CoinTypes.Ethereum)
                     .account(0)
                     .external()
                     .address(0);
             CoinPairDerive coinKeyPair = new CoinPairDerive(extendedKey);
             ECKeyPair master = coinKeyPair.derive(address);
 
-            Log.e("=1221=", "======================");
+            Log.e("=1221=", "==" + address.toString());
             Log.e("=1221private", master.getPrivateKey());
             Log.e("=1221public=", master.getPublicKey());
             Log.e("=1221address=", master.getAddress());
@@ -197,5 +199,21 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        String s = BIP44.m()
+                .purpose44()
+                .coinType(CoinTypes.Ethereum)
+                .account(0)
+                .external()
+                .address(1,true).toString();
+        Log.e("=====", "address1  " + s);
+        try {
+            AddressIndex addressIndex = BIP44.parsePath(s);
+            String s1 = addressIndex.toString();
+            Log.e("=====", "address2  " + s1);
+        } catch (NonSupportException e) {
+            e.printStackTrace();
+        } catch (CoinNotFindException e) {
+            e.printStackTrace();
+        }
     }
 }
