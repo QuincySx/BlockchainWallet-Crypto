@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/BlockchainWallet-Crypto.iml" filepath="$PROJECT_DIR$/BlockchainWallet-Crypto.iml" />
-      <module fileurl="file://C:\Users\q7728\Desktop\BlockchainWallet-Crypto\CryptoDemo.iml" filepath="C:\Users\q7728\Desktop\BlockchainWallet-Crypto\CryptoDemo.iml" />
       <module fileurl="file://$PROJECT_DIR$/library/library.iml" filepath="$PROJECT_DIR$/library/library.iml" />
       <module fileurl="file://$PROJECT_DIR$/sample/sample.iml" filepath="$PROJECT_DIR$/sample/sample.iml" />
     </modules>

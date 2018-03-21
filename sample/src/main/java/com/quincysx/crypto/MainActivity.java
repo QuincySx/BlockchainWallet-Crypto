@@ -22,7 +22,18 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+//import org.web3j.crypto.ECKeyPair;
+import org.web3j.crypto.*;
+import org.web3j.crypto.WalletFile;
+import static org.web3j.crypto.Wallet.createStandard;
+
 public class MainActivity extends AppCompatActivity {
+
+    private static final int N = 1 << 9;
+    /**
+     * Parallelization parameter. Must be a positive integer less than or equal to Integer.MAX_VALUE / (128 * r * 8).
+     */
+    private static final int P = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +133,10 @@ public class MainActivity extends AppCompatActivity {
             CoinPairDerive coinKeyPair = new CoinPairDerive(extendedKey);
             ECKeyPair master = coinKeyPair.derive(address);
 
+            org.web3j.crypto.ECKeyPair keypair = org.web3j.crypto.ECKeyPair.create(master.getRawPrivateKey());
+
+            WalletFile walletFile = createStandard("111111", keypair);
+
             Log.e("=1221=", "==" + address.toString());
             Log.e("=1221private", master.getPrivateKey());
             Log.e("=1221public=", master.getPublicKey());
@@ -196,6 +211,8 @@ public class MainActivity extends AppCompatActivity {
         } catch (MnemonicException.MnemonicChecksumException e) {
             e.printStackTrace();
         } catch (MnemonicException.MnemonicWordException e) {
+            e.printStackTrace();
+        } catch (CipherException e) {
             e.printStackTrace();
         }
 

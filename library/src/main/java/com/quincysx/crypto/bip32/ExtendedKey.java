@@ -120,7 +120,7 @@ public class ExtendedKey {
 
     public static ExtendedKey create(byte[] seed) throws ValidationException {
         try {
-            Mac mac = Mac.getInstance("HmacSHA512", "BC");
+            Mac mac = Mac.getInstance("HmacSHA512");
             SecretKey seedkey = new SecretKeySpec(BITCOIN_SEED, "HmacSHA512");
             mac.init(seedkey);
             byte[] lr = mac.doFinal(seed);
@@ -133,8 +133,6 @@ public class ExtendedKey {
             ECKeyPair keyPair = new ECKeyPair(l, true);
             return new ExtendedKey(keyPair, r, 0, 0, 0);
         } catch (NoSuchAlgorithmException e) {
-            throw new ValidationException(e);
-        } catch (NoSuchProviderException e) {
             throw new ValidationException(e);
         } catch (InvalidKeyException e) {
             throw new ValidationException(e);
@@ -210,7 +208,7 @@ public class ExtendedKey {
             if ((sequence & 0x80000000) != 0 && master.getRawPrivateKey() == null) {
                 throw new ValidationException("need private key for private generation");
             }
-            Mac mac = Mac.getInstance("HmacSHA512", "BC");
+            Mac mac = Mac.getInstance("HmacSHA512");
             SecretKey key = new SecretKeySpec(chainCode, "HmacSHA512");
             mac.init(key);
 
@@ -258,8 +256,6 @@ public class ExtendedKey {
                 return new ExtendedKey(new ECPublicKey(pub, true), r, depth, parent, sequence);
             }
         } catch (NoSuchAlgorithmException e) {
-            throw new ValidationException(e);
-        } catch (NoSuchProviderException e) {
             throw new ValidationException(e);
         } catch (InvalidKeyException e) {
             throw new ValidationException(e);
