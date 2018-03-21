@@ -108,6 +108,10 @@ public final class BTCTransaction implements Transaction {
 
     @Override
     public byte[] getSignBytes() {
+        return getSignBytes();
+    }
+
+    public byte[] getBytes() {
         BitcoinOutputStream baos = new BitcoinOutputStream();
         try {
             baos.writeInt32(version);
@@ -142,7 +146,6 @@ public final class BTCTransaction implements Transaction {
             }
         }
         return baos.toByteArray();
-
     }
 
     @Override
@@ -652,6 +655,7 @@ public final class BTCTransaction implements Transaction {
                 throw new RuntimeException(e);
             }
         }
+
     }
 
     @Override
@@ -661,6 +665,7 @@ public final class BTCTransaction implements Transaction {
         for (int i = 0; i < length; i++) {
             this.inputs[i] = sign.inputs[i];
         }
+//        return sign.getSignBytes();
         return getSignBytes();
     }
 

@@ -14,9 +14,14 @@ import com.quincysx.crypto.bip39.Words;
 import com.quincysx.crypto.bip44.AddressIndex;
 import com.quincysx.crypto.bip44.BIP44;
 import com.quincysx.crypto.bip44.CoinPairDerive;
+import com.quincysx.crypto.bitcoin.BTCTransaction;
 import com.quincysx.crypto.bitcoin.BitCoinECKeyPair;
+import com.quincysx.crypto.bitcoin.BitcoinException;
 import com.quincysx.crypto.exception.CoinNotFindException;
 import com.quincysx.crypto.exception.NonSupportException;
+import com.quincysx.crypto.utils.HexUtils;
+
+import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -91,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
         mnemonicWordsInAList.add("athlete");
         mnemonicWordsInAList.add("diet");
 
-        Log.e("=====","==="+mnemonicWordsInAList.toString());
+        Log.e("=====", "===" + mnemonicWordsInAList.toString());
         try {
             byte[] random = RandomSeed.random(Words.TWELVE);
             MnemonicCode mnemonicCode = new MnemonicCode();
@@ -115,12 +120,20 @@ public class MainActivity extends AppCompatActivity {
 
             ExtendedKey extendedKey = ExtendedKey.create(seed);
             AddressIndex address = BIP44.m().purpose44()
-                    .coinType(CoinTypes.Ethereum)
+                    .coinType(CoinTypes.BitcoinTest)
                     .account(0)
                     .external()
                     .address(0);
             CoinPairDerive coinKeyPair = new CoinPairDerive(extendedKey);
             ECKeyPair master = coinKeyPair.derive(address);
+
+            try {
+                BTCTransaction btcTransaction = new BTCTransaction(HexUtils.fromHex("02000000018aad5febb0f5165097727eb402d15e96c615560b6d4e0fcbee0882ff589af3220000000000ffffffff0240420f00000000001976a91438ae48c4ff53e9ba952d3c63f200f2dfe04f330188aca0cd8700000000001976a91481f9f80df4efb08e373fa8f2b8896f33e3a270f388ac00000000"));
+                byte[] sign = btcTransaction.sign(master);
+                Log.e("===", HexUtils.toHex(sign));
+            } catch (BitcoinException e) {
+                e.printStackTrace();
+            }
 
             Log.e("=1221=", "==" + address.toString());
             Log.e("=1221private", master.getPrivateKey());
@@ -204,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
                 .coinType(CoinTypes.Ethereum)
                 .account(0)
                 .external()
-                .address(1,true).toString();
+                .address(1, true).toString();
         Log.e("=====", "address1  " + s);
         try {
             AddressIndex addressIndex = BIP44.parsePath(s);

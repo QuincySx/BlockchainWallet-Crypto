@@ -148,6 +148,19 @@ public class ExtendedKey {
         return new ExtendedKey(key, chainCode, 0, 0, 0);
     }
 
+    /**
+     * @param bytes
+     * @return
+     * @throws ValidationException
+     * @deprecated
+     */
+    public static ExtendedKey parsePrivateKey(byte[] bytes) throws ValidationException {
+        Key key = new ECKeyPair(bytes, true);
+        byte[] chainCode = new byte[32];
+        rnd.nextBytes(chainCode);
+        return new ExtendedKey(key, chainCode, 0, 0, 0);
+    }
+
     public ExtendedKey(Key key, byte[] chainCode, int depth, int parent, int sequence) {
         this.master = key;
         this.chainCode = chainCode;
