@@ -108,7 +108,7 @@ public final class BTCTransaction implements Transaction {
 
     @Override
     public byte[] getSignBytes() {
-        return getSignBytes();
+        return getBytes();
     }
 
     public byte[] getBytes() {
