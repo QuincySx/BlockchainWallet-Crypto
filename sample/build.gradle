@@ -20,7 +20,8 @@ android {
 
 dependencies {
     // Etherium client
-    implementation "org.web3j:core:3.0.1-android"
+    implementation "org.web3j:core:3.3.1-android"
+//    implementation "org.web3j:crypto:3.3.1-android"
     implementation "org.ethereum:geth:1.7.0"
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])

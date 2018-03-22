@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.quincysx.crypto.bip32.ExtendedKey;
 import com.quincysx.crypto.bip32.ValidationException;
 import com.quincysx.crypto.bip38.Bip38;
@@ -17,7 +18,9 @@ import com.quincysx.crypto.bip44.CoinPairDerive;
 import com.quincysx.crypto.bitcoin.BitCoinECKeyPair;
 import com.quincysx.crypto.exception.CoinNotFindException;
 import com.quincysx.crypto.exception.NonSupportException;
+import com.quincysx.crypto.utils.HexUtils;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +28,10 @@ import java.util.List;
 //import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.*;
 import org.web3j.crypto.WalletFile;
+
 import static org.web3j.crypto.Wallet.createStandard;
+
+import com.missionpublic.blockchain.Account;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -101,9 +107,25 @@ public class MainActivity extends AppCompatActivity {
         mnemonicWordsInAList.add("amazing");
         mnemonicWordsInAList.add("athlete");
         mnemonicWordsInAList.add("diet");
-
-        Log.e("=====","==="+mnemonicWordsInAList.toString());
         try {
+            Account account = new Account("123456");
+            Log.e("1111111", account.getAddress());
+            Log.e("2222222", account.getKeyStore());
+            Log.e("=====", "===" + account.getMnemonic());
+
+
+            Account account1 = new Account("{\"address\":\"128a5f2969df5dac41863f6fd227435c6c5b5665\",\"id\":\"fa4960b2-62c1-4e70-b4ae-505b5f2141d2\",\"version\":3,\"crypto\":{\"cipher\":\"aes-128-ctr\",\"cipherparams\":{\"iv\":\"ad357c89d5b96ed7c97b73ba8c0840de\"},\"ciphertext\":\"25cbfe0726ca818ecdbff485d9a80f6b359d38ded758b8c6d52089d813b1b6ee\",\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":262144,\"p\":1,\"r\":8,\"salt\":\"6aece844bcc5eef5ee9505328b83422e25aa87e5cb612e07dabe05e78d902814\"},\"mac\":\"53abf903bef4bce498cbef75e61254dc2a64cb7a5a377075fff5ca954d42b6f5\"}}","123456");
+            Log.e("333333", account1.getAddress());
+            Log.e("444444", account1.getKeyStore());
+
+            Account account2 = new Account(mnemonicWordsInAList,"123456");
+            Log.e("555555", account2.getPrivateKey());
+            Log.e("666666", account2.getKeyStore());
+
+            Account account3 = new Account(HexUtils.fromHex("08bb06bba09340dc6934d4ed3b613b801f76b9838c53406a5753854fe622bc90"),"123456");
+            Log.e("777777", account3.getPrivateKey());
+            Log.e("888888", account3.getKeyStore());
+
             byte[] random = RandomSeed.random(Words.TWELVE);
             MnemonicCode mnemonicCode = new MnemonicCode();
             List<String> strings = mnemonicCode.toMnemonic(random);
@@ -214,6 +236,10 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         } catch (CipherException e) {
             e.printStackTrace();
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         String s = BIP44.m()
@@ -221,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
                 .coinType(CoinTypes.Ethereum)
                 .account(0)
                 .external()
-                .address(1,true).toString();
+                .address(1, true).toString();
         Log.e("=====", "address1  " + s);
         try {
             AddressIndex addressIndex = BIP44.parsePath(s);
