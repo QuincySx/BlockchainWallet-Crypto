@@ -125,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
             Account account3 = new Account(HexUtils.fromHex("08bb06bba09340dc6934d4ed3b613b801f76b9838c53406a5753854fe622bc90"),"123456");
             Log.e("777777", account3.getPrivateKey());
             Log.e("888888", account3.getKeyStore());
+            Log.e("999999", account3.createSignTransaction(new BigInteger("10000"), new BigInteger("2000000"), new BigInteger("30000000"), "00d8012bb1579ef4f3c99bde6a28caabe68b3004", new BigInteger("1000000000"), ""));
 
             byte[] random = RandomSeed.random(Words.TWELVE);
             MnemonicCode mnemonicCode = new MnemonicCode();

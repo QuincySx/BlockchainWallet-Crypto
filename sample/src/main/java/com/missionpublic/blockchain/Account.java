@@ -24,7 +24,11 @@ import org.spongycastle.math.ec.ECPoint;
 import org.spongycastle.util.Arrays;
 
 import org.web3j.crypto.*;
+import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.WalletFile;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.TransactionEncoder;
+
 
 import static org.web3j.crypto.Wallet.createStandard;
 import static org.web3j.crypto.Wallet.decrypt;
@@ -141,5 +145,13 @@ public class Account {
 
     public void decryptWallet(String password) throws CipherException {
         this.keypair = decrypt(password, this.walletFile);
+    }
+
+    public String createSignTransaction(BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, String to,
+                                        BigInteger value, String data) throws CipherException {
+        RawTransaction tran = RawTransaction.createTransaction(nonce, gasPrice, gasLimit, to, value, data);
+        Credentials cred = Credentials.create(this.keypair);
+        byte[] signResult = TransactionEncoder.signMessage(tran, cred);
+        return HexUtils.toHex(signResult);
     }
 }
