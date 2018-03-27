@@ -1,9 +1,11 @@
-package com.quincysx.crypto;
+package com.quincysx.crypto.smpale;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.quincysx.crypto.CoinTypes;
+import com.quincysx.crypto.ECKeyPair;
 import com.quincysx.crypto.bip32.ExtendedKey;
 import com.quincysx.crypto.bip32.ValidationException;
 import com.quincysx.crypto.bip38.Bip38;
@@ -20,8 +22,6 @@ import com.quincysx.crypto.bitcoin.BitcoinException;
 import com.quincysx.crypto.exception.CoinNotFindException;
 import com.quincysx.crypto.exception.NonSupportException;
 import com.quincysx.crypto.utils.HexUtils;
-
-import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
