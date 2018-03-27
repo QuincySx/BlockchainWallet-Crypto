@@ -44,6 +44,35 @@ public class BitCoinECKeyPair extends ECKeyPair {
         return new BitCoinECKeyPair(keyPair, testNet);
     }
 
+    public static BitCoinECKeyPair parseWIF(String wif) throws ValidationException {
+        byte[] decode = Base58.decode(wif);
+
+        //判断私钥格式
+        byte[] check = new byte[4];
+        System.arraycopy(decode, decode.length - 4, check, 0, check.length);
+        byte[] privateCheck = SHA256.doubleSha256(decode, 0, decode.length - 4);
+        for (int i = 0; i < 4; i++) {
+            if (check[i] != privateCheck[i]) {
+                throw new ValidationException("WIF Private Key Incorrect format");
+            }
+        }
+
+        boolean isCompressed = false;
+        if (decode.length == RAW_PRIVATE_KEY_COMPRESSED_LENGTH) {
+            isCompressed = true;
+        }
+
+        boolean isTestNet = false;
+        if (decode[0] == (byte) TEST_NET_PRIVATE_KEY_PREFIX) {
+            isTestNet = true;
+        }
+
+        byte[] bytes = new byte[32];
+        System.arraycopy(decode, 1, bytes, 0, bytes.length);
+
+        return new BitCoinECKeyPair(bytes, isTestNet, isCompressed);
+    }
+
     public BitCoinECKeyPair(byte[] p, boolean testNet, boolean compressed) throws
             ValidationException {
         super(p, compressed);
@@ -156,26 +185,6 @@ public class BitCoinECKeyPair extends ECKeyPair {
 
     public boolean verifyBTC(byte[] hash, byte[] signature) {
         return verify(hash, signature, pubComp);
-    }
-
-    public static ECKeyPair parseWIF(String serialized) throws ValidationException {
-        byte[] store = Base58.decode(serialized);
-        return parseBytesWIF(store);
-    }
-
-    public static ECKeyPair parseBytesWIF(byte[] store) throws ValidationException {
-        if (store.length == 37) {
-            checkChecksum(store);
-            byte[] key = new byte[store.length - 5];
-            System.arraycopy(store, 1, key, 0, store.length - 5);
-            return new ECKeyPair(key, false);
-        } else if (store.length == 38) {
-            checkChecksum(store);
-            byte[] key = new byte[store.length - 6];
-            System.arraycopy(store, 1, key, 0, store.length - 6);
-            return new ECKeyPair(key, true);
-        }
-        throw new ValidationException("Invalid key length");
     }
 
     private static void checkChecksum(byte[] store) throws ValidationException {

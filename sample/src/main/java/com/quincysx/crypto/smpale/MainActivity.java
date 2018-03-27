@@ -8,7 +8,6 @@ import com.quincysx.crypto.CoinTypes;
 import com.quincysx.crypto.ECKeyPair;
 import com.quincysx.crypto.bip32.ExtendedKey;
 import com.quincysx.crypto.bip32.ValidationException;
-import com.quincysx.crypto.bip38.Bip38;
 import com.quincysx.crypto.bip39.MnemonicCode;
 import com.quincysx.crypto.bip39.MnemonicException;
 import com.quincysx.crypto.bip39.RandomSeed;
@@ -128,7 +127,8 @@ public class MainActivity extends AppCompatActivity {
             ECKeyPair master = coinKeyPair.derive(address);
 
             try {
-                BTCTransaction btcTransaction = new BTCTransaction(HexUtils.fromHex("02000000018aad5febb0f5165097727eb402d15e96c615560b6d4e0fcbee0882ff589af3220000000000ffffffff0240420f00000000001976a91438ae48c4ff53e9ba952d3c63f200f2dfe04f330188aca0cd8700000000001976a91481f9f80df4efb08e373fa8f2b8896f33e3a270f388ac00000000"));
+                BTCTransaction btcTransaction = new BTCTransaction(HexUtils.fromHex
+                        ("02000000018aad5febb0f5165097727eb402d15e96c615560b6d4e0fcbee0882ff589af3220000000000ffffffff0240420f00000000001976a91438ae48c4ff53e9ba952d3c63f200f2dfe04f330188aca0cd8700000000001976a91481f9f80df4efb08e373fa8f2b8896f33e3a270f388ac00000000"));
                 byte[] sign = btcTransaction.sign(master);
                 Log.e("===", HexUtils.toHex(sign));
             } catch (BitcoinException e) {
@@ -141,18 +141,27 @@ public class MainActivity extends AppCompatActivity {
             Log.e("=1221address=", master.getAddress());
             Log.e("=1221=", "======================");
 
-            if (master instanceof BitCoinECKeyPair) {
-                try {
-                    String s = Bip38.encryptNoEcMultiply("123456", master
-                            .getPrivateKey());
-                    Log.e("=====", s);
-                    BitCoinECKeyPair s1 = Bip38.decrypt(s, "123456");
+            Log.e("=====", "================================================sdasdasdasd");
+            BitCoinECKeyPair bitCoinECKeyPair = BitCoinECKeyPair.parseWIF(master.getPrivateKey());
+            Log.e("=====", "================================================sdasdasdasd");
 
-                    Log.e("=====", s1.getPrivateKey());
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+            Log.e("=1221private", bitCoinECKeyPair.getPrivateKey());
+            Log.e("=1221public=", bitCoinECKeyPair.getPublicKey());
+            Log.e("=1221address=", bitCoinECKeyPair.getAddress());
+            Log.e("=1221=", "======================");
+
+//            if (master instanceof BitCoinECKeyPair) {
+//                try {
+//                    String s = Bip38.encryptNoEcMultiply("123456", master
+//                            .getPrivateKey());
+//                    Log.e("=====", s);
+//                    BitCoinECKeyPair s1 = Bip38.decrypt(s, "123456");
+//
+//                    Log.e("=====", s1.getPrivateKey());
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
 
             //普通上链签名=========
             BigInteger nonce = new BigInteger("12");
