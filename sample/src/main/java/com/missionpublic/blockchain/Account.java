@@ -30,7 +30,7 @@ import org.web3j.crypto.Credentials;
 import org.web3j.crypto.TransactionEncoder;
 
 
-import static org.web3j.crypto.Wallet.createStandard;
+import static org.web3j.crypto.Wallet.createLight;
 import static org.web3j.crypto.Wallet.decrypt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -64,7 +64,7 @@ public class Account {
         CoinPairDerive coinKeyPair = new CoinPairDerive(extendedKey);
         ECKeyPair master = coinKeyPair.derive(address);
         this.keypair = org.web3j.crypto.ECKeyPair.create(master.getRawPrivateKey());
-        this.walletFile = createStandard(password, this.keypair);
+        this.walletFile = createLight(password, this.keypair);
     }
 
     public Account(List<String> mnemonicWordsInAList, String password) throws ValidationException, CipherException {
@@ -83,13 +83,13 @@ public class Account {
         CoinPairDerive coinKeyPair = new CoinPairDerive(extendedKey);
         ECKeyPair master = coinKeyPair.derive(address);
         this.keypair = org.web3j.crypto.ECKeyPair.create(master.getRawPrivateKey());
-        this.walletFile = createStandard(password, this.keypair);
+        this.walletFile = createLight(password, this.keypair);
     }
 
     public Account(byte[] privateKey, String password) {
         try {
             this.keypair = org.web3j.crypto.ECKeyPair.create(privateKey);
-            this.walletFile = createStandard(password, this.keypair);
+            this.walletFile = createLight(password, this.keypair);
         } catch (CipherException e) {
             e.printStackTrace();
         }
@@ -133,7 +133,7 @@ public class Account {
 
     public String changePassword(String password) throws JsonProcessingException, CipherException {
         ObjectMapper mapper = new ObjectMapper();
-        this.walletFile = createStandard(password, this.keypair);
+        this.walletFile = createLight(password, this.keypair);
         String jsonStr = mapper.writeValueAsString(this.walletFile);
         return jsonStr;
     }
