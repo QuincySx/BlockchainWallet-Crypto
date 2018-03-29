@@ -24,7 +24,7 @@ import org.spongycastle.math.ec.ECPoint;
 import org.spongycastle.util.Arrays;
 
 import org.web3j.crypto.*;
-import org.web3j.crypto.RawTransaction;
+import org.web3j.protocol.core.methods.request.RawTransaction;
 import org.web3j.crypto.WalletFile;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.TransactionEncoder;

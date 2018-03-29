@@ -114,18 +114,18 @@ public class MainActivity extends AppCompatActivity {
             Log.e("=====", "===" + account.getMnemonic());
 
 
-//            Account account1 = new Account("{\"address\":\"128a5f2969df5dac41863f6fd227435c6c5b5665\",\"id\":\"fa4960b2-62c1-4e70-b4ae-505b5f2141d2\",\"version\":3,\"crypto\":{\"cipher\":\"aes-128-ctr\",\"cipherparams\":{\"iv\":\"ad357c89d5b96ed7c97b73ba8c0840de\"},\"ciphertext\":\"25cbfe0726ca818ecdbff485d9a80f6b359d38ded758b8c6d52089d813b1b6ee\",\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":262144,\"p\":1,\"r\":8,\"salt\":\"6aece844bcc5eef5ee9505328b83422e25aa87e5cb612e07dabe05e78d902814\"},\"mac\":\"53abf903bef4bce498cbef75e61254dc2a64cb7a5a377075fff5ca954d42b6f5\"}}","123456");
-//            Log.e("333333", account1.getAddress());
-//            Log.e("444444", account1.getKeyStore());
-//
-//            Account account2 = new Account(mnemonicWordsInAList,"123456");
-//            Log.e("555555", account2.getPrivateKey());
-//            Log.e("666666", account2.getKeyStore());
-//
-//            Account account3 = new Account(HexUtils.fromHex("08bb06bba09340dc6934d4ed3b613b801f76b9838c53406a5753854fe622bc90"),"123456");
-//            Log.e("777777", account3.getPrivateKey());
-//            Log.e("888888", account3.getKeyStore());
-//            Log.e("999999", account3.createSignTransaction(new BigInteger("10000"), new BigInteger("2000000"), new BigInteger("30000000"), "00d8012bb1579ef4f3c99bde6a28caabe68b3004", new BigInteger("1000000000"), ""));
+            Account account1 = new Account("{\"address\":\"128a5f2969df5dac41863f6fd227435c6c5b5665\",\"id\":\"fa4960b2-62c1-4e70-b4ae-505b5f2141d2\",\"version\":3,\"crypto\":{\"cipher\":\"aes-128-ctr\",\"cipherparams\":{\"iv\":\"ad357c89d5b96ed7c97b73ba8c0840de\"},\"ciphertext\":\"25cbfe0726ca818ecdbff485d9a80f6b359d38ded758b8c6d52089d813b1b6ee\",\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":262144,\"p\":1,\"r\":8,\"salt\":\"6aece844bcc5eef5ee9505328b83422e25aa87e5cb612e07dabe05e78d902814\"},\"mac\":\"53abf903bef4bce498cbef75e61254dc2a64cb7a5a377075fff5ca954d42b6f5\"}}","123456");
+            Log.e("333333", account1.getAddress());
+            Log.e("444444", account1.getKeyStore());
+
+            Account account2 = new Account(mnemonicWordsInAList,"123456");
+            Log.e("555555", account2.getPrivateKey());
+            Log.e("666666", account2.getKeyStore());
+
+            Account account3 = new Account(HexUtils.fromHex("08bb06bba09340dc6934d4ed3b613b801f76b9838c53406a5753854fe622bc90"),"123456");
+            Log.e("777777", account3.getPrivateKey());
+            Log.e("888888", account3.getKeyStore());
+            Log.e("999999", account3.createSignTransaction(new BigInteger("10000"), new BigInteger("2000000"), new BigInteger("30000000"), "00d8012bb1579ef4f3c99bde6a28caabe68b3004", new BigInteger("1000000000"), ""));
 //
 //            byte[] random = RandomSeed.random(Words.TWELVE);
 //            MnemonicCode mnemonicCode = new MnemonicCode();
@@ -227,13 +227,15 @@ public class MainActivity extends AppCompatActivity {
 //            Log.e("====转Token签名===", HexUtils.toHex(rawHash));
 
 
-        } catch (ValidationException e) {
-            e.printStackTrace();
-        } catch (MnemonicException.MnemonicLengthException e) {
-            e.printStackTrace();
         } catch (CipherException e) {
             e.printStackTrace();
         } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (MnemonicException.MnemonicLengthException e) {
+            e.printStackTrace();
+        } catch (ValidationException e) {
             e.printStackTrace();
         }
 
