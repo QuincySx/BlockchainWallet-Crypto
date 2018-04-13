@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.quincysx.crypto.CoinTypes;
 import com.quincysx.crypto.ECKeyPair;
+import com.quincysx.crypto.Transaction;
 import com.quincysx.crypto.bip32.ExtendedKey;
 import com.quincysx.crypto.bip32.ValidationException;
 import com.quincysx.crypto.bip39.MnemonicCode;
@@ -18,6 +19,8 @@ import com.quincysx.crypto.bip44.CoinPairDerive;
 import com.quincysx.crypto.bitcoin.BTCTransaction;
 import com.quincysx.crypto.bitcoin.BitCoinECKeyPair;
 import com.quincysx.crypto.bitcoin.BitcoinException;
+import com.quincysx.crypto.ethereum.CallTransaction;
+import com.quincysx.crypto.ethereum.EthTransaction;
 import com.quincysx.crypto.exception.CoinNotFindException;
 import com.quincysx.crypto.exception.NonSupportException;
 import com.quincysx.crypto.utils.HexUtils;
@@ -183,25 +186,21 @@ public class MainActivity extends AppCompatActivity {
 //            Log.e("====签名===", HexUtils.toHex(rawHash));
 
 
-//            //调用合约查余额====
-//            EthTransaction txConst = CallTransaction.createCallTransaction(nonce.longValue(),
-// gasPrice.longValue(), gasLimit.longValue(),
-//                    "6b3b3386f46d2872a4bbfda001cebc7dec844593", 0, CallTransaction.Function
-// .fromSignature("balanceOf","address"),"cAfEE4583441D2682bEa06b6E8bFA722a7cea848");
-//            txConst.sign((ECKeyPair) master.getMaster());
-//            byte[] data = txConst.getData();
-//            byte[] rawHash = txConst.getEncoded();
-//
-//            Log.e("====合约===", HexUtils.toHex(data));
-//            Log.e("====签名===", HexUtils.toHex(rawHash));
+            //调用合约查余额====
+            CallTransaction.Function function = CallTransaction.Function
+                    .fromSignature("balanceOf", "address");
+            byte[] data = function.encode("cAfEE4583441D2682bEa06b6E8bFA722a7cea848");
+
+            Log.e("====合约===", HexUtils.toHex(data));
+
 
             //转 Token
-//            Transaction txConst = CallTransaction.createCallTransaction(nonce.longValue(),
-// gasPrice.longValue(), gasLimit.longValue(),
-//                    "6b3b3386f46d2872a4bbfda001cebc7dec844593", 0,
+//            Transaction txConst = CallTransaction.createCallTransaction(nonce,
+//                    gasPrice, gasLimit,
+//                    "6b3b3386f46d2872a4bbfda001cebc7dec844593", new BigInteger("0"),
 //                    CallTransaction.Function.fromSignature("transfer",
 //                            "address", "uint256"), "4de1f8192dc059cc15f7ba2a045082263cfd1644",
-// 100000000000000000L);
+//                    new BigInteger("100000000000000000"));
 //
 //            txConst.sign(master);
 //            byte[] data = txConst.getData();

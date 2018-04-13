@@ -33,11 +33,14 @@ import com.quincysx.crypto.ethereum.vm.LogInfo;
 import com.quincysx.crypto.utils.KECCAK256;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 import org.spongycastle.pqc.math.linearalgebra.ByteUtils;
+import org.spongycastle.util.BigIntegers;
 import org.spongycastle.util.encoders.Hex;
 
 /**
@@ -52,26 +55,36 @@ public class CallTransaction {
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
 
-    public static EthTransaction createRawTransaction(long nonce, long gasPrice, long gasLimit, String toAddress,
-                                                      long value, byte[] data) {
-        EthTransaction tx = new EthTransaction(longToBytesNoLeadZeroes(nonce),
-                longToBytesNoLeadZeroes(gasPrice),
-                longToBytesNoLeadZeroes(gasLimit),
+    public static EthTransaction createRawTransaction(BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, String toAddress,
+                                                      BigInteger value, byte[] data) {
+        EthTransaction tx = new EthTransaction(BigIntegers.asUnsignedByteArray(nonce),
+                BigIntegers.asUnsignedByteArray(gasPrice),
+                BigIntegers.asUnsignedByteArray(gasLimit),
                 toAddress == null ? null : Hex.decode(toAddress),
-                longToBytesNoLeadZeroes(value),
+                BigIntegers.asUnsignedByteArray(value),
                 data,
                 null);
         return tx;
     }
 
 
-    public static EthTransaction createCallTransaction(long nonce, long gasPrice, long gasLimit, String toAddress,
-                                                       long value, Function callFunc, Object... funcArgs) {
-
+    /**
+     * 创建交易
+     *
+     * @param nonce     nonce
+     * @param gasPrice  gasPrice
+     * @param gasLimit  gasLimit
+     * @param toAddress toAddress
+     * @param value     value
+     * @param callFunc  调用合约方法
+     * @param funcArgs  合约参数（Int 数值请使用BigInteger或字符串）
+     * @return 交易
+     */
+    public static EthTransaction createCallTransaction(BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, String toAddress,
+                                                       BigInteger value, Function callFunc, Object... funcArgs) {
         byte[] callData = callFunc.encode(funcArgs);
         return createRawTransaction(nonce, gasPrice, gasLimit, toAddress, value, callData);
     }
-
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Param {
