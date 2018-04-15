@@ -4,9 +4,11 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quincysx.crypto.CoinTypes;
 import com.quincysx.crypto.ECKeyPair;
-import com.quincysx.crypto.Transaction;
 import com.quincysx.crypto.bip32.ExtendedKey;
 import com.quincysx.crypto.bip32.ValidationException;
 import com.quincysx.crypto.bip39.MnemonicCode;
@@ -16,15 +18,12 @@ import com.quincysx.crypto.bip39.Words;
 import com.quincysx.crypto.bip44.AddressIndex;
 import com.quincysx.crypto.bip44.BIP44;
 import com.quincysx.crypto.bip44.CoinPairDerive;
-import com.quincysx.crypto.bitcoin.BTCTransaction;
-import com.quincysx.crypto.bitcoin.BitCoinECKeyPair;
-import com.quincysx.crypto.bitcoin.BitcoinException;
-import com.quincysx.crypto.ethereum.CallTransaction;
-import com.quincysx.crypto.ethereum.EthTransaction;
-import com.quincysx.crypto.exception.CoinNotFindException;
-import com.quincysx.crypto.exception.NonSupportException;
-import com.quincysx.crypto.utils.HexUtils;
+import com.quincysx.crypto.ethereum.EthECKeyPair;
+import com.quincysx.crypto.ethereum.keystore.CipherException;
+import com.quincysx.crypto.ethereum.keystore.KeyStore;
+import com.quincysx.crypto.ethereum.keystore.KeyStoreFile;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -122,21 +121,12 @@ public class MainActivity extends AppCompatActivity {
 
             ExtendedKey extendedKey = ExtendedKey.create(seed);
             AddressIndex address = BIP44.m().purpose44()
-                    .coinType(CoinTypes.BitcoinTest)
+                    .coinType(CoinTypes.Ethereum)
                     .account(0)
                     .external()
                     .address(0);
             CoinPairDerive coinKeyPair = new CoinPairDerive(extendedKey);
             ECKeyPair master = coinKeyPair.derive(address);
-
-            try {
-                BTCTransaction btcTransaction = new BTCTransaction(HexUtils.fromHex
-                        ("02000000018aad5febb0f5165097727eb402d15e96c615560b6d4e0fcbee0882ff589af3220000000000ffffffff0240420f00000000001976a91438ae48c4ff53e9ba952d3c63f200f2dfe04f330188aca0cd8700000000001976a91481f9f80df4efb08e373fa8f2b8896f33e3a270f388ac00000000"));
-                byte[] sign = btcTransaction.sign(master);
-                Log.e("===", HexUtils.toHex(sign));
-            } catch (BitcoinException e) {
-                e.printStackTrace();
-            }
 
             Log.e("=1221=", "==" + address.toString());
             Log.e("=1221private", master.getPrivateKey());
@@ -144,14 +134,54 @@ public class MainActivity extends AppCompatActivity {
             Log.e("=1221address=", master.getAddress());
             Log.e("=1221=", "======================");
 
-            Log.e("=====", "================================================sdasdasdasd");
-            BitCoinECKeyPair bitCoinECKeyPair = BitCoinECKeyPair.parseWIF(master.getPrivateKey());
-            Log.e("=====", "================================================sdasdasdasd");
+            if (master instanceof EthECKeyPair) {
+                try {
+                    KeyStoreFile light = KeyStore.createLight("123456", (EthECKeyPair) master);
 
-            Log.e("=1221private", bitCoinECKeyPair.getPrivateKey());
-            Log.e("=1221public=", bitCoinECKeyPair.getPublicKey());
-            Log.e("=1221address=", bitCoinECKeyPair.getAddress());
-            Log.e("=1221=", "======================");
+                    Log.e("======", light.toString());
+                } catch (CipherException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            KeyStoreFile keyStoreFile = new ObjectMapper().readValue
+                    ("{\"address\":\"cafee4583441d2682bea06b6e8bfa722a7cea848\"," +
+                            "\"id\":\"1562c4fe-c714-4187-ad62-6baff33e3633\",\"version\":3," +
+                            "\"crypto\":{\"cipher\":\"aes-128-ctr\"," +
+                            "\"cipherparams\":{\"iv\":\"e0ba8a361141cc01f6860170ab8ee25c\"}," +
+                            "\"ciphertext\":\"4ee617421d4283c706c2bd48f43739d58b4aede740b62208f78cd33427419062\",\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":4096,\"p\":6,\"r\":8,\"salt\":\"85aab20aa7398f4dc0cde887c3b44c5d0ac2a5419dd6eb026272cccc55dc2588\"},\"mac\":\"29dd9c95c69611926cc826df68d65899fe11f18990d3dac7ba3778980e5a45ec\"}}",
+                    KeyStoreFile.class);
+
+            try {
+                ECKeyPair decrypt = KeyStore.decrypt("123456", keyStoreFile);
+
+                Log.e("=12321=", "==" + decrypt.toString());
+                Log.e("=12321private", decrypt.getPrivateKey());
+                Log.e("=12321public=", decrypt.getPublicKey());
+                Log.e("=12321address=", decrypt.getAddress());
+                Log.e("=12321=", "======================");
+            } catch (CipherException e) {
+                e.printStackTrace();
+            }
+
+//            try {
+//                BTCTransaction btcTransaction = new BTCTransaction(HexUtils.fromHex
+//
+// ("02000000018aad5febb0f5165097727eb402d15e96c615560b6d4e0fcbee0882ff589af3220000000000ffffffff0240420f00000000001976a91438ae48c4ff53e9ba952d3c63f200f2dfe04f330188aca0cd8700000000001976a91481f9f80df4efb08e373fa8f2b8896f33e3a270f388ac00000000"));
+//                byte[] sign = btcTransaction.sign(master);
+//                Log.e("===", HexUtils.toHex(sign));
+//            } catch (BitcoinException e) {
+//                e.printStackTrace();
+//            }
+
+//            Log.e("=====", "================================================sdasdasdasd");
+//            BitCoinECKeyPair bitCoinECKeyPair = BitCoinECKeyPair.parseWIF(master.getPrivateKey());
+//            Log.e("=====", "================================================sdasdasdasd");
+//
+//            Log.e("=1221private", bitCoinECKeyPair.getPrivateKey());
+//            Log.e("=1221public=", bitCoinECKeyPair.getPublicKey());
+//            Log.e("=1221address=", bitCoinECKeyPair.getAddress());
+//            Log.e("=1221=", "======================");
 
 //            if (master instanceof BitCoinECKeyPair) {
 //                try {
@@ -187,11 +217,11 @@ public class MainActivity extends AppCompatActivity {
 
 
             //调用合约查余额====
-            CallTransaction.Function function = CallTransaction.Function
-                    .fromSignature("balanceOf", "address");
-            byte[] data = function.encode("cAfEE4583441D2682bEa06b6E8bFA722a7cea848");
-
-            Log.e("====合约===", HexUtils.toHex(data));
+//            CallTransaction.Function function = CallTransaction.Function
+//                    .fromSignature("balanceOf", "address");
+//            byte[] data = function.encode("cAfEE4583441D2682bEa06b6E8bFA722a7cea848");
+//
+//            Log.e("====合约===", HexUtils.toHex(data));
 
 
             //转 Token
@@ -218,23 +248,30 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         } catch (MnemonicException.MnemonicWordException e) {
             e.printStackTrace();
+        } catch (JsonParseException e) {
+            e.printStackTrace();
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        String s = BIP44.m()
-                .purpose44()
-                .coinType(CoinTypes.Ethereum)
-                .account(0)
-                .external()
-                .address(1, true).toString();
-        Log.e("=====", "address1  " + s);
-        try {
-            AddressIndex addressIndex = BIP44.parsePath(s);
-            String s1 = addressIndex.toString();
-            Log.e("=====", "address2  " + s1);
-        } catch (NonSupportException e) {
-            e.printStackTrace();
-        } catch (CoinNotFindException e) {
-            e.printStackTrace();
-        }
+//        String s = BIP44.m()
+//                .purpose44()
+//                .coinType(CoinTypes.Ethereum)
+//                .account(0)
+//                .external()
+//                .address(1, true).toString();
+//        Log.e("=====", "address1  " + s);
+//        try {
+//            AddressIndex addressIndex = BIP44.parsePath(s);
+//            String s1 = addressIndex.toString();
+//            Log.e("=====", "address2  " + s1);
+//        } catch (NonSupportException e) {
+//            e.printStackTrace();
+//        } catch (CoinNotFindException e) {
+//            e.printStackTrace();
+//        }
+
     }
 }
