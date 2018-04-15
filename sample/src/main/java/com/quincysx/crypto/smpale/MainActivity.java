@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (master instanceof EthECKeyPair) {
                 try {
-                    KeyStoreFile light = KeyStore.createLight("123456", (EthECKeyPair) master);
+                    KeyStoreFile light = KeyStore.createStandard("123456", (EthECKeyPair) master);
 
                     Log.e("======", light.toString());
                 } catch (CipherException e) {

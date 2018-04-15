@@ -315,7 +315,8 @@ public class Bip38 {
         byte[] saltPlusOwnerSalt = new byte[12];
         System.arraycopy(bip38Key.salt, 0, saltPlusOwnerSalt, 0, 4);
         System.arraycopy(ownerEntropy, 0, saltPlusOwnerSalt, 4, 8);
-        byte[] derived = SCrypt.generate(passPoint, saltPlusOwnerSalt, 1024, 1, 1, 64);
+//        byte[] derived = SCrypt.generate(passPoint, saltPlusOwnerSalt, 1024, 1, 1, 64);
+        byte[] derived = SCrypt.generate(passPoint, saltPlusOwnerSalt, SCRYPT_N, SCRYPT_R, SCRYPT_P, SCRYPT_LENGTH);
         byte[] derivedQuater1 = new byte[16];
         System.arraycopy(derived, 0, derivedQuater1, 0, 16);
         byte[] derivedQuater2 = new byte[16];
