@@ -61,6 +61,11 @@ public class KeyStoreFile {
         this.version = version;
     }
 
+    public static KeyStoreFile parse(String keystore) throws IOException {
+        return new ObjectMapper().readValue
+                (keystore, KeyStoreFile.class);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

@@ -6,7 +6,6 @@ import android.util.Log;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quincysx.crypto.CoinTypes;
 import com.quincysx.crypto.ECKeyPair;
 import com.quincysx.crypto.bip32.ExtendedKey;
@@ -136,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (master instanceof EthECKeyPair) {
                 try {
-                    KeyStoreFile light = KeyStore.createStandard("123456", (EthECKeyPair) master);
+                    KeyStoreFile light = KeyStore.createLight("123456", (EthECKeyPair) master);
 
                     Log.e("======", light.toString());
                 } catch (CipherException e) {
@@ -144,13 +143,11 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            KeyStoreFile keyStoreFile = new ObjectMapper().readValue
-                    ("{\"address\":\"cafee4583441d2682bea06b6e8bfa722a7cea848\"," +
+            KeyStoreFile keyStoreFile = KeyStoreFile.parse("{\"address\":\"cafee4583441d2682bea06b6e8bfa722a7cea848\"," +
                             "\"id\":\"1562c4fe-c714-4187-ad62-6baff33e3633\",\"version\":3," +
                             "\"crypto\":{\"cipher\":\"aes-128-ctr\"," +
                             "\"cipherparams\":{\"iv\":\"e0ba8a361141cc01f6860170ab8ee25c\"}," +
-                            "\"ciphertext\":\"4ee617421d4283c706c2bd48f43739d58b4aede740b62208f78cd33427419062\",\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":4096,\"p\":6,\"r\":8,\"salt\":\"85aab20aa7398f4dc0cde887c3b44c5d0ac2a5419dd6eb026272cccc55dc2588\"},\"mac\":\"29dd9c95c69611926cc826df68d65899fe11f18990d3dac7ba3778980e5a45ec\"}}",
-                    KeyStoreFile.class);
+                            "\"ciphertext\":\"4ee617421d4283c706c2bd48f43739d58b4aede740b62208f78cd33427419062\",\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":4096,\"p\":6,\"r\":8,\"salt\":\"85aab20aa7398f4dc0cde887c3b44c5d0ac2a5419dd6eb026272cccc55dc2588\"},\"mac\":\"29dd9c95c69611926cc826df68d65899fe11f18990d3dac7ba3778980e5a45ec\"}}");
 
             try {
                 ECKeyPair decrypt = KeyStore.decrypt("123456", keyStoreFile);
