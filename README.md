@@ -7,3 +7,7 @@
 
 #### 使用说明
 [wiki](https://github.com/QuincySx/BlockchainWallet-Crypto/wiki)
+
+
+## LICENSE
+[开源协议](LICENSE)
