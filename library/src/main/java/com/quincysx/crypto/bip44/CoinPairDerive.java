@@ -1,5 +1,7 @@
 package com.quincysx.crypto.bip44;
 
+import android.util.Log;
+
 import com.quincysx.crypto.CoinTypes;
 import com.quincysx.crypto.ECKeyPair;
 import com.quincysx.crypto.bip32.ExtendedKey;
@@ -7,6 +9,11 @@ import com.quincysx.crypto.bip32.Index;
 import com.quincysx.crypto.bip32.ValidationException;
 import com.quincysx.crypto.bitcoin.BitCoinECKeyPair;
 import com.quincysx.crypto.ethereum.EthECKeyPair;
+import com.quincysx.crypto.utils.HexUtils;
+import com.quincysx.crypto.utils.SHA256;
+
+import org.spongycastle.crypto.digests.MD5Digest;
+import org.spongycastle.jcajce.provider.digest.MD5;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -25,7 +32,9 @@ public class CoinPairDerive {
     }
 
     public ExtendedKey deriveByExtendedKey(AddressIndex addressIndex) throws ValidationException {
-        ExtendedKey extendedKey = sExtendedKeyMap.get(addressIndex.toString());
+        String keyStr = HexUtils.toHex(mExtendedKey.getChainCode()) + HexUtils.toHex(mExtendedKey.getMaster().getRawPublicKey()) + addressIndex.toString();
+        byte[] byteKey = SHA256.sha256(keyStr.getBytes());
+        ExtendedKey extendedKey = sExtendedKeyMap.get(HexUtils.toHex(byteKey));
         if (extendedKey != null) {
             return extendedKey;
         }
@@ -41,7 +50,7 @@ public class CoinPairDerive {
                 .getChild(Index.hard(account))
                 .getChild(change)
                 .getChild(address);
-        sExtendedKeyMap.put(addressIndex.toString(), child);
+        sExtendedKeyMap.put(HexUtils.toHex(byteKey), child);
         return child;
     }
 
