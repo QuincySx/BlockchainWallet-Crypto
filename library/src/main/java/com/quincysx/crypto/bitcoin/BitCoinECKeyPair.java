@@ -63,7 +63,7 @@ public class BitCoinECKeyPair extends ECKeyPair {
         }
 
         boolean isTestNet = false;
-        if (decode[0] == (byte) TEST_NET_PRIVATE_KEY_PREFIX) {
+        if ((decode[0] & 0xFF) == TEST_NET_PRIVATE_KEY_PREFIX) {
             isTestNet = true;
         }
 
