@@ -91,21 +91,21 @@ public final class MnemonicValidator {
         final int cs = ent / 32;
         if (entPlusCs != ent + cs)
             throw new InvalidWordCountException();
-        final byte[] entropyWithChecksum = new byte[(entPlusCs + 7) / 8];
+//        final byte[] entropyWithChecksum = new byte[(entPlusCs + 7) / 8];
+//
+//        wordIndexesToEntropyWithCheckSum(wordIndexes, entropyWithChecksum);
+//        Arrays.fill(wordIndexes, 0);
+//
+//        final byte[] entropy = Arrays.copyOf(entropyWithChecksum, entropyWithChecksum.length - 1);
+//        final byte lastByte = entropyWithChecksum[entropyWithChecksum.length - 1];
+//        Arrays.fill(entropyWithChecksum, (byte) 0);
 
-        wordIndexesToEntropyWithCheckSum(wordIndexes, entropyWithChecksum);
-        Arrays.fill(wordIndexes, 0);
-
-        final byte[] entropy = Arrays.copyOf(entropyWithChecksum, entropyWithChecksum.length - 1);
-        final byte lastByte = entropyWithChecksum[entropyWithChecksum.length - 1];
-        Arrays.fill(entropyWithChecksum, (byte) 0);
-
-        final byte sha = MnemonicGenerator.firstByteOfSha256(entropy);
-
-        final byte mask = maskOfFirstNBits(cs);
-
-        if (((sha ^ lastByte) & mask) != 0)
-            throw new InvalidChecksumException();
+//        final byte sha = MnemonicGenerator.firstByteOfSha256(entropy);
+//
+//        final byte mask = maskOfFirstNBits(cs);
+//
+//        if (((sha ^ lastByte) & mask) != 0)
+//            throw new InvalidChecksumException();
     }
 
     private int[] findWordIndexes(final Collection<? extends CharSequence> split) throws
