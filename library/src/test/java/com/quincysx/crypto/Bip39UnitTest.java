@@ -2,8 +2,9 @@ package com.quincysx.crypto;
 
 import com.quincysx.crypto.bip39.MnemonicGenerator;
 import com.quincysx.crypto.bip39.MnemonicValidator;
+import com.quincysx.crypto.bip39.RandomSeed;
 import com.quincysx.crypto.bip39.SeedCalculator;
-import com.quincysx.crypto.bip39.Words;
+import com.quincysx.crypto.bip39.WordCount;
 import com.quincysx.crypto.bip39.validation.InvalidChecksumException;
 import com.quincysx.crypto.bip39.validation.InvalidWordCountException;
 import com.quincysx.crypto.bip39.validation.UnexpectedWhiteSpaceException;
@@ -12,9 +13,7 @@ import com.quincysx.crypto.bip39.wordlists.English;
 import com.quincysx.crypto.utils.HexUtils;
 
 import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
 
-import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,17 +34,9 @@ public class Bip39UnitTest {
 
     @Test
     public void mnemonic() {
-        final StringBuilder sb = new StringBuilder();
-        byte[] entropy = new byte[Words.TWELVE.byteLength()];
-        new SecureRandom().nextBytes(entropy);
-        new MnemonicGenerator(English.INSTANCE)
-                .createMnemonic(entropy, new MnemonicGenerator.Target() {
-                    @Override
-                    public void append(CharSequence string) {
-                        sb.append(string);
-                    }
-                });
-        assertNotNull(sb);
+        byte[] random = RandomSeed.random(WordCount.TWELVE);
+        List<String> mnemonic = new MnemonicGenerator(English.INSTANCE).createMnemonic(random);
+        assertNotNull(mnemonic);
     }
 
     @Test
@@ -85,6 +76,9 @@ public class Bip39UnitTest {
                 .withWordsFromWordList(English.INSTANCE)
                 .calculateSeed(mnemonicWordsInAList, "");
 
-        assertEquals(HexUtils.toHex(seed), "165b063a8f7a58e3650534512f53ffeb2cdab1b73604ce631f5e340aa3ff266cb8811bd671ff6268d10bc64200ea671c94e35f413d130d3d9e7ee86b10021c54");
+        byte[] seed1 = new SeedCalculator()
+                .calculateSeed(mnemonicWordsInAList, "");
+
+        assertEquals(HexUtils.toHex(seed1), "165b063a8f7a58e3650534512f53ffeb2cdab1b73604ce631f5e340aa3ff266cb8811bd671ff6268d10bc64200ea671c94e35f413d130d3d9e7ee86b10021c54");
     }
 }

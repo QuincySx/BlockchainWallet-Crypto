@@ -8,11 +8,11 @@ import java.util.Random;
  * @date 2018/3/13 上午11:06
  */
 public class RandomSeed {
-    public static byte[] random(Words words) {
+    public static byte[] random(WordCount words) {
         return random(words, new SecureRandom());
     }
 
-    public static byte[] random(Words words, Random random) {
+    public static byte[] random(WordCount words, Random random) {
         byte[] randomSeed = new byte[words.byteLength()];
         random.nextBytes(randomSeed);
         return randomSeed;

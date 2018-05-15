@@ -23,8 +23,6 @@ import java.util.WeakHashMap;
  * @date 2018/3/5 下午3:48
  */
 public class CoinPairDerive {
-    private static Map<String, ExtendedKey> sExtendedKeyMap = new WeakHashMap<>();
-
     private ExtendedKey mExtendedKey;
 
     public CoinPairDerive(ExtendedKey extendedKey) {
@@ -32,12 +30,6 @@ public class CoinPairDerive {
     }
 
     public ExtendedKey deriveByExtendedKey(AddressIndex addressIndex) throws ValidationException {
-        String keyStr = HexUtils.toHex(mExtendedKey.getChainCode()) + HexUtils.toHex(mExtendedKey.getMaster().getRawPublicKey()) + addressIndex.toString();
-        byte[] byteKey = SHA256.sha256(keyStr.getBytes());
-        ExtendedKey extendedKey = sExtendedKeyMap.get(HexUtils.toHex(byteKey));
-        if (extendedKey != null) {
-            return extendedKey;
-        }
         int address = addressIndex.getValue();
         int change = addressIndex.getParent().getValue();
         int account = addressIndex.getParent().getParent().getValue();
@@ -50,7 +42,6 @@ public class CoinPairDerive {
                 .getChild(Index.hard(account))
                 .getChild(change)
                 .getChild(address);
-        sExtendedKeyMap.put(HexUtils.toHex(byteKey), child);
         return child;
     }
 

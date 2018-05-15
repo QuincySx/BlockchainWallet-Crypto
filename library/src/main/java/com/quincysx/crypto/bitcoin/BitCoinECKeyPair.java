@@ -253,6 +253,7 @@ public class BitCoinECKeyPair extends ECKeyPair {
             if (i == index) {
                 //设置地址签名
                 script = new BTCTransaction.Script(HexUtils.fromHex(publicScript));
+
             }
             transaction.inputs[i] = new BTCTransaction.Input(transaction.inputs[i].outPoint,
                     script, transaction.inputs[i].sequence);

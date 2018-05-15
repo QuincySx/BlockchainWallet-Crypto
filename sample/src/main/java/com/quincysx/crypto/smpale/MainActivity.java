@@ -10,10 +10,12 @@ import com.quincysx.crypto.CoinTypes;
 import com.quincysx.crypto.ECKeyPair;
 import com.quincysx.crypto.bip32.ExtendedKey;
 import com.quincysx.crypto.bip32.ValidationException;
-import com.quincysx.crypto.bip39.MnemonicCode;
-import com.quincysx.crypto.bip39.MnemonicException;
+import com.quincysx.crypto.bip39.MnemonicGenerator;
+import com.quincysx.crypto.bip39.MnemonicValidator;
 import com.quincysx.crypto.bip39.RandomSeed;
-import com.quincysx.crypto.bip39.Words;
+import com.quincysx.crypto.bip39.SeedCalculator;
+import com.quincysx.crypto.bip39.WordCount;
+import com.quincysx.crypto.bip39.wordlists.English;
 import com.quincysx.crypto.bip44.AddressIndex;
 import com.quincysx.crypto.bip44.BIP44;
 import com.quincysx.crypto.bip44.CoinPairDerive;
@@ -98,12 +100,9 @@ public class MainActivity extends AppCompatActivity {
 
         Log.e("=====", "===" + mnemonicWordsInAList.toString());
         try {
-            byte[] random = RandomSeed.random(Words.TWELVE);
-            MnemonicCode mnemonicCode = new MnemonicCode();
-            List<String> strings = mnemonicCode.toMnemonic(random);
-            byte[] bytes = mnemonicCode.toEntropy(strings);
-
-            byte[] seed = MnemonicCode.toSeed(mnemonicWordsInAList, "");
+            byte[] random = RandomSeed.random(WordCount.TWELVE);
+            List<String> strings = new MnemonicGenerator(English.INSTANCE).createMnemonic(random);
+            byte[] seed = new SeedCalculator().calculateSeed(strings,"");
 
 //            ExtendedKey extendedKey = ExtendedKey.create(seed);
 //            AddressIndex address = BIP44.m().purpose44()
@@ -144,10 +143,10 @@ public class MainActivity extends AppCompatActivity {
             }
 
             KeyStoreFile keyStoreFile = KeyStoreFile.parse("{\"address\":\"cafee4583441d2682bea06b6e8bfa722a7cea848\"," +
-                            "\"id\":\"1562c4fe-c714-4187-ad62-6baff33e3633\",\"version\":3," +
-                            "\"crypto\":{\"cipher\":\"aes-128-ctr\"," +
-                            "\"cipherparams\":{\"iv\":\"e0ba8a361141cc01f6860170ab8ee25c\"}," +
-                            "\"ciphertext\":\"4ee617421d4283c706c2bd48f43739d58b4aede740b62208f78cd33427419062\",\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":4096,\"p\":6,\"r\":8,\"salt\":\"85aab20aa7398f4dc0cde887c3b44c5d0ac2a5419dd6eb026272cccc55dc2588\"},\"mac\":\"29dd9c95c69611926cc826df68d65899fe11f18990d3dac7ba3778980e5a45ec\"}}");
+                    "\"id\":\"1562c4fe-c714-4187-ad62-6baff33e3633\",\"version\":3," +
+                    "\"crypto\":{\"cipher\":\"aes-128-ctr\"," +
+                    "\"cipherparams\":{\"iv\":\"e0ba8a361141cc01f6860170ab8ee25c\"}," +
+                    "\"ciphertext\":\"4ee617421d4283c706c2bd48f43739d58b4aede740b62208f78cd33427419062\",\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":4096,\"p\":6,\"r\":8,\"salt\":\"85aab20aa7398f4dc0cde887c3b44c5d0ac2a5419dd6eb026272cccc55dc2588\"},\"mac\":\"29dd9c95c69611926cc826df68d65899fe11f18990d3dac7ba3778980e5a45ec\"}}");
 
             try {
                 ECKeyPair decrypt = KeyStore.decrypt("123456", keyStoreFile);
@@ -238,12 +237,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         } catch (ValidationException e) {
-            e.printStackTrace();
-        } catch (MnemonicException.MnemonicLengthException e) {
-            e.printStackTrace();
-        } catch (MnemonicException.MnemonicChecksumException e) {
-            e.printStackTrace();
-        } catch (MnemonicException.MnemonicWordException e) {
             e.printStackTrace();
         } catch (JsonParseException e) {
             e.printStackTrace();

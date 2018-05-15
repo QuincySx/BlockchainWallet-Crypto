@@ -16,7 +16,7 @@
  *
  */
 
-package com.quincysx.crypto.bip39;
+package com.quincysx.crypto.bip39.exception;
 
 /**
  * Exceptions thrown by the MnemonicCode module.

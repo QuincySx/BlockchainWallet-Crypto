@@ -3,8 +3,9 @@ package com.quincysx.crypto.bip39;
 /**
  * @author QuincySx
  * @date 2018/3/2 下午4:27
+ * 词语个数的枚举
  */
-public enum Words {
+public enum WordCount {
     /**
      * 3个助记词
      */
@@ -40,7 +41,7 @@ public enum Words {
 
     private final int bitLength;
 
-    Words(int bitLength) {
+    WordCount(int bitLength) {
         this.bitLength = bitLength;
     }
 
