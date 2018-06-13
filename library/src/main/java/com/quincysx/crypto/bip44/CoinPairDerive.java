@@ -8,6 +8,7 @@ import com.quincysx.crypto.bip32.ExtendedKey;
 import com.quincysx.crypto.bip32.Index;
 import com.quincysx.crypto.bip32.ValidationException;
 import com.quincysx.crypto.bitcoin.BitCoinECKeyPair;
+import com.quincysx.crypto.eos.EOSECKeyPair;
 import com.quincysx.crypto.ethereum.EthECKeyPair;
 import com.quincysx.crypto.utils.HexUtils;
 import com.quincysx.crypto.utils.SHA256;
@@ -58,6 +59,8 @@ public class CoinPairDerive {
                 return BitCoinECKeyPair.parse(child.getMaster(), true);// convertBitcoinKeyPair(new BigInteger(1, child.getMaster().getPrivate()), true);
             case Ethereum:
                 return EthECKeyPair.parse(child.getMaster());//convertEthKeyPair(new BigInteger(1, child.getMaster().getPrivate()));
+            case EOS:
+                return EOSECKeyPair.parse(child.getMaster());
             case Bitcoin:
             default:
                 return BitCoinECKeyPair.parse(child.getMaster(), false);//convertBitcoinKeyPair(new BigInteger(1, child.getMaster().getPrivate()), false);

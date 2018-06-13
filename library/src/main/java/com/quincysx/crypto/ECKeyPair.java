@@ -56,7 +56,7 @@ public class ECKeyPair implements Key {
 
     public ECKeyPair(byte[] p, boolean compressed) throws ValidationException {
         this(new BigInteger(1, p), compressed);
-        if (!(p.length == 32 || p.length == 43)) {
+        if (!(p.length == 32 || p.length == 43 )) {
             throw new ValidationException("Invalid private key");
         }
     }

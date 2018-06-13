@@ -158,7 +158,8 @@ public final class BTCTransaction implements Transaction {
         return "{" +
                 "\n\"inputs\":\n" + printAsJsonArray(inputs) +
                 ",\n\"outputs\":\n" + printAsJsonArray(outputs) +
-                ",\n\"lockTime\":\"" + lockTime + "\"}\n";
+                ",\n\"lockTime\":\"" + lockTime + "\"\n" +
+                ",\n\"version\":\"" + version + "\"}\n";
     }
 
     private String printAsJsonArray(Object[] a) {
