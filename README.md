@@ -18,7 +18,7 @@
 
 #### 欢迎给位提设计上的 lssues 和 pr
 
-#### 引入项目 [![](https://jitpack.io/v/QuincySx/BlockchainWallet-Crypto.svg)](https://jitpack.io/#QuincySx/BlockchainWallet-Crypto)
+#### 引入项目
 
 ```
 allprojects {
@@ -29,7 +29,7 @@ allprojects {
 }
   
 dependencies {
-  implementation 'com.github.QuincySx:BlockchainWallet-Crypto:lase'
+  implementation 'com.github.QuincySx:BlockchainWallet-Crypto:last-version'
 }
 ```
 
