@@ -20,7 +20,9 @@ public class EthCheckAddress {
 
         StringBuilder result = new StringBuilder(lowercaseAddress.length() + 2);
 
-        result.append("0x");
+        if (containsHexPrefix(address)) {
+            result.append("0x");
+        }
 
         for (int i = 0; i < lowercaseAddress.length(); i++) {
             if (Integer.parseInt(String.valueOf(addressHash.charAt(i)), 16) >= 8) {

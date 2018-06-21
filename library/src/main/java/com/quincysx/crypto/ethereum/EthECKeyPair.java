@@ -3,6 +3,7 @@ package com.quincysx.crypto.ethereum;
 import com.quincysx.crypto.ECKeyPair;
 import com.quincysx.crypto.Key;
 import com.quincysx.crypto.bip32.ValidationException;
+import com.quincysx.crypto.eip55.EthCheckAddress;
 import com.quincysx.crypto.utils.HexUtils;
 import com.quincysx.crypto.utils.KECCAK256;
 
@@ -70,7 +71,7 @@ public class EthECKeyPair extends ECKeyPair {
 
     @Override
     public String getAddress() {
-        return HexUtils.toHex(getRawAddress());
+        return EthCheckAddress.toChecksumAddress(HexUtils.toHex(getRawAddress()));
     }
 
     public ECDSASignature doSign(byte[] input) {
