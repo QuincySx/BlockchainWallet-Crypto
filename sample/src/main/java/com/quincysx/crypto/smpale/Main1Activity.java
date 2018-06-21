@@ -20,6 +20,7 @@ import com.quincysx.crypto.bip44.BIP44;
 import com.quincysx.crypto.bip44.CoinPairDerive;
 import com.quincysx.crypto.bitcoin.BTCTransaction;
 import com.quincysx.crypto.bitcoin.BitcoinException;
+import com.quincysx.crypto.eip55.EthCheckAddress;
 import com.quincysx.crypto.eos.EOSECKeyPair;
 import com.quincysx.crypto.ethereum.EthECKeyPair;
 import com.quincysx.crypto.ethereum.keystore.CipherException;
@@ -57,7 +58,6 @@ public class Main1Activity extends AppCompatActivity {
         strings.add("a");
 
         byte[] seed = new SeedCalculator().calculateSeed(strings, "");
-        byte[] seed = new byte[0];
         try {
             seed = com.quincysx.crypto.utils.SHA256.sha256("a a a a a a a a a a a a".getBytes("Utf-8"));
         } catch (UnsupportedEncodingException e) {
