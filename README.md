@@ -18,6 +18,21 @@
 
 #### 欢迎给位提设计上的 lssues 和 pr
 
+#### 引入项目
+
+```
+allprojects {
+  repositories {
+    ...
+		maven { url 'https://jitpack.io' }
+  }
+}
+  
+dependencies {
+  implementation 'com.github.QuincySx:BlockchainWallet-Crypto:last-version'
+}
+```
+
 #### 使用说明
 [简单使用说明](https://github.com/QuincySx/BlockchainWallet-Crypto/wiki)
 
