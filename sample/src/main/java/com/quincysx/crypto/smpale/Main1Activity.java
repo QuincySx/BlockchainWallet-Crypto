@@ -66,19 +66,19 @@ public class Main1Activity extends AppCompatActivity {
 
 
 //        byte[] seed = new SeedCalculator().calculateSeed(strings, "");
-        EOSECKeyPair eosecKeyPair = new EOSECKeyPair(new BigInteger(seed));
+
 
 //        EOSECKeyPair eosecKeyPair = new EOSECKeyPair(ECKeyPair.createNew(true));
 
-//        try {
+        try {
 //            EOSECKeyPair eosecKeyPair = EOSECKeyPair.parse("5JLwgEmaMivG4h4TH6T9WXMCerVU9SqTrrVm5g89idvG9CT4GUg");
-        //public  EOS6iGwqWSuGK9JGNxbU1kM4DoadTAHNNcuAvJ1EyU5BUJy9u3dQa
-
-        Log.e("=private=", eosecKeyPair.getPrivateKey());
-        Log.e("=public=", eosecKeyPair.getPublicKey());
-//        } catch (ValidationException e) {
-//            e.printStackTrace();
-//        }
+            //public  EOS6iGwqWSuGK9JGNxbU1kM4DoadTAHNNcuAvJ1EyU5BUJy9u3dQa
+            EOSECKeyPair eosecKeyPair = new EOSECKeyPair(seed);
+            Log.e("=private=", eosecKeyPair.getPrivateKey());
+            Log.e("=public=", eosecKeyPair.getPublicKey());
+        } catch (ValidationException e) {
+            e.printStackTrace();
+        }
 
     }
 }
