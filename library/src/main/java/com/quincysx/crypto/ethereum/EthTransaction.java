@@ -501,6 +501,10 @@ public class EthTransaction implements Transaction {
         return rlpRaw;
     }
 
+    public void setSignature(ECDSASignature signature) {
+        this.signature = signature;
+    }
+
     public byte[] getEncoded() {
 
         if (rlpEncoded != null) return rlpEncoded;
