@@ -15,6 +15,14 @@
 10. 支持 BIP38 加密私钥导入导出
 11. 支持以太坊 keystore 导入导出
 12. 生成以太坊调用智能合约的参数
+13. 生成 EOS 公私钥
+
+#### EOS 从助记词生成私钥
+现在 EOS 从助记词生成私钥有两种方式
+1. 12 个助记词之间用空格隔开拼接成字符串，然后 Hash 得到私钥
+2. 采用 Bip44 标准的生成方案
+
+经过国内大部分钱包商议统一使用第二种方案解决 EOS 从助记词生成私钥的问题
 
 #### 欢迎给位提设计上的 lssues 和 pr
 
@@ -35,6 +43,9 @@ dependencies {
 
 #### 使用说明
 [简单使用说明](https://github.com/QuincySx/BlockchainWallet-Crypto/wiki)
+
+## 相关资料
+[Bip44 注册币种列表](https://github.com/satoshilabs/slips/blob/master/slip-0044.md)
 
 ## LICENSE
 [开源协议](LICENSE)
