@@ -190,8 +190,9 @@ public class KeyStore {
             int p = scryptKdfParams.getP();
             int r = scryptKdfParams.getR();
             byte[] salt = HexUtils.fromHex(scryptKdfParams.getSalt());
-            derivedKey = generateDerivedScryptKey(password.getBytes(Charset.forName("UTF-8")),
-                    salt, n, r, p, dklen);
+//            derivedKey = generateDerivedScryptKey(password.getBytes(Charset.forName("UTF-8")),
+//                    salt, n, r, p, dklen);
+            derivedKey = com.lambdaworks.crypto.SCrypt.scryptN(password.getBytes(Charset.forName("UTF-8")), salt, n, r, p, dklen);
         } else if (kdfParams instanceof KeyStoreFile.Aes128CtrKdfParams) {
             KeyStoreFile.Aes128CtrKdfParams aes128CtrKdfParams =
                     (KeyStoreFile.Aes128CtrKdfParams) crypto.getKdfparams();
