@@ -1,5 +1,5 @@
 # BlockchainWallet-Crypto
-[![](https://jitpack.io/v/QuincySx/BlockchainWallet-Crypto.svg)](https://jitpack.io/#QuincySx/BlockchainWallet-Crypto)
+[![](https://jitpack.io/v/SmallRaw/BlockchainWallet-Crypto.svg)](https://jitpack.io/#SmallRaw/BlockchainWallet-Crypto)
 
 #### 简介
 ##### 这个库到底能干什么
@@ -37,7 +37,7 @@ allprojects {
 }
   
 dependencies {
-  implementation 'com.github.QuincySx:BlockchainWallet-Crypto:last-version'
+  implementation 'com.github.SmallRaw:BlockchainWallet-Crypto:last-version'
 }
 ```
 
