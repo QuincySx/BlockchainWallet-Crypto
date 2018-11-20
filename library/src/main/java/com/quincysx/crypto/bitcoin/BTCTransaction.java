@@ -263,6 +263,8 @@ public final class BTCTransaction implements Transaction {
         public static final byte OP_CHECKSIGVERIFY = (byte) 0xAD;
         public static final byte OP_NOP = 0x61;
 
+        public static final byte OP_RETURN = 0x6a;
+
         public static final byte SIGHASH_ALL = 1;
 
         public final byte[] bytes;
@@ -290,19 +292,19 @@ public final class BTCTransaction implements Transaction {
                 baos.write(OP_PUSHDATA1);
                 baos.write(data.length);
             } else if (data.length < 0xffff) {
-                baos.write(OP_PUSHDATA2);
-                baos.write(data.length);
 //                baos.write(OP_PUSHDATA2);
-//                baos.write(data.length & 0xff);
-//                baos.write((data.length >> 8) & 0xff);
+//                baos.write(data.length);
+                baos.write(OP_PUSHDATA2);
+                baos.write(data.length & 0xff);
+                baos.write((data.length >> 8) & 0xff);
             } else {
-                baos.write(OP_PUSHDATA4);
-                baos.write(data.length);
 //                baos.write(OP_PUSHDATA4);
-//                baos.write(data.length & 0xff);
-//                baos.write((data.length >> 8) & 0xff);
-//                baos.write((data.length >> 16) & 0xff);
-//                baos.write((data.length >>> 24) & 0xff);
+//                baos.write(data.length);
+                baos.write(OP_PUSHDATA4);
+                baos.write(data.length & 0xff);
+                baos.write((data.length >> 8) & 0xff);
+                baos.write((data.length >> 16) & 0xff);
+                baos.write((data.length >>> 24) & 0xff);
             }
             baos.write(data);
         }
@@ -622,8 +624,9 @@ public final class BTCTransaction implements Transaction {
             //noinspection TryWithIdenticalCatches
             try {
                 byte[] addressWithCheckSumAndNetworkCode = Base58.decode(address);
-                if (addressWithCheckSumAndNetworkCode[0] != 0 &&
-                        addressWithCheckSumAndNetworkCode[0] != 111) {
+                if (addressWithCheckSumAndNetworkCode[0] != 0
+                        && addressWithCheckSumAndNetworkCode[0] != 111
+                        && addressWithCheckSumAndNetworkCode[0] != 5) {
                     throw new BitcoinException(BitcoinException.ERR_UNSUPPORTED, "Unknown address" +
                             " type", address);
                 }
@@ -643,13 +646,23 @@ public final class BTCTransaction implements Transaction {
                     }
                 }
 
-                ByteArrayOutputStream buf = new ByteArrayOutputStream(25);
-                buf.write(OP_DUP);
-                buf.write(OP_HASH160);
-                writeBytes(bareAddress, buf);
-                buf.write(OP_EQUALVERIFY);
-                buf.write(OP_CHECKSIG);
-                return new Script(buf.toByteArray());
+                if (addressWithCheckSumAndNetworkCode[0] == 5) {
+                    //P2SH 的锁定脚本
+                    ByteArrayOutputStream buf = new ByteArrayOutputStream();
+                    buf.write(OP_HASH160);
+                    writeBytes(bareAddress, buf);
+                    buf.write(OP_EQUAL);
+                    return new Script(buf.toByteArray());
+                } else {
+                    //P2PKH 的锁定脚本
+                    ByteArrayOutputStream buf = new ByteArrayOutputStream(25);
+                    buf.write(OP_DUP);
+                    buf.write(OP_HASH160);
+                    writeBytes(bareAddress, buf);
+                    buf.write(OP_EQUALVERIFY);
+                    buf.write(OP_CHECKSIG);
+                    return new Script(buf.toByteArray());
+                }
             } catch (NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);
             } catch (IOException e) {
