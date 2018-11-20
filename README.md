@@ -37,7 +37,7 @@ allprojects {
 }
   
 dependencies {
-  implementation 'com.github.SmallRaw:BlockchainWallet-Crypto:last-version'
+  implementation 'com.github.QuincySx:BlockchainWallet-Crypto:last-version'
 }
 ```
 
