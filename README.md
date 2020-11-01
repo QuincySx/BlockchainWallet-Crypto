@@ -1,6 +1,8 @@
 # BlockchainWallet-Crypto
 [![](https://jitpack.io/v/QuincySx/BlockchainWallet-Crypto.svg)](https://jitpack.io/#QuincySx/BlockchainWallet-Crypto)
 
+# 长时间不维护可移步 https://github.com/QuincySx/ChainWallet
+
 #### 简介
 ##### 这个库到底能干什么
 1. 生成比特币公私钥地址
